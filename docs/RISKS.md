@@ -1,22 +1,26 @@
 # Cerno — Risks
 
-Status: **v1.1 draft** (2026-11-15). Revised after the architecture review and the two consistency checks. Each risk lists why it matters, likelihood (L) and impact (I), how to check it early, the mitigation, and the fallback. **Validated** means a spike or test has measured it. **Assumed** means we believe it but haven't checked.
+Status: **v2.0 draft** (2026-11-15). v1.1 came from the architecture review. v2.0 applies D9 ($0, local-first): R4 and R9 change and R14–R17 are new. Each risk lists why it matters, likelihood (L) and impact (I), how to check it early, the mitigation, and the fallback. **Validated** means a spike or test has measured it. **Assumed** means we believe it but haven't checked.
 
 | # | Risk | L | I | State |
 |---|---|---|---|---|
 | R1 | Queries run fine but answer the wrong question (wrong join, grain, filter or period) | Med | High | assumed mitigated |
 | R2 | Statistical conclusions are overstated | Med | High | assumed mitigated |
 | R3 | Untrusted SQL or files escape the sandbox, steal secrets or exhaust resources | Low | High | assumed mitigated |
-| R4 | API spend runs away (abuse, races, underestimated cost per run) | Med | High | unvalidated |
+| R4 | ~~API spend runs away~~ (retired by D9: no paid APIs). Replaced by R14. | — | — | retired |
 | R5 | Reports are wrong but look verified (hallucination, injection steering) | Med | High | assumed mitigated |
 | R6 | The agent loops or stalls | Low | Med | mitigated by design |
 | R7 | Business definitions are ambiguous | Med | Med | mitigated by design |
 | R8 | The eval can't tell good changes from bad ones | Med | High | assumed mitigated |
-| R9 | The hosting setup doesn't hold up (memory, volume, SSE through the proxy) | Med | Med | unvalidated |
+| R9 | ~~Hosting doesn't hold up~~ (retired by D9: local app plus a static showcase) | — | — | retired |
 | R10 | Scope is too big for the time available | High | High | partly mitigated; timeline unknown |
 | R11 | Results aren't reproducible (hash flakes) | Med | Med | unvalidated |
 | R12 | Windows dev vs. Linux prod differences waste days | Med | Low | decision pending (D5) |
-| R13 | The structured-output schema is too large or slow for typed steps with dynamic enums | Low | Med | unvalidated |
+| R13 | The structured-output schema is too large or slow for typed steps with dynamic enums | Med | Med | unvalidated (S2L) |
+| R14 | No local model that fits 6 GB of VRAM is good enough for PLAN and SYNTHESIZE | Med | High | partly measured (probe); S2L |
+| R15 | Local inference is too slow for a good live demo or an affordable-in-time benchmark | Med | Med | partly measured (probe); S2L |
+| R16 | Grammar-constrained output parses, but its content is wrong (ignored schema keywords, plausible but wrong enums) | High | Med | observed in probe; mitigated by design |
+| R17 | Results depend on one machine's hardware and drivers, so others can't reproduce them | Med | Med | assumed mitigated |
 
 ### R1 — Logically wrong SQL
 - **Why it matters:** a wrong number looks exactly like a right one.
@@ -38,10 +42,8 @@ Status: **v1.1 draft** (2026-11-15). Revised after the architecture review and t
 - **Validate early:** spike S1 plus the security test suite.
 - **Fallback:** a container per query (gVisor, Firecracker), at a large cost in latency.
 
-### R4 — API spend
-- **Mitigation:** a reservation before each call against three budgets (per run, per invite code, global daily). Per-stage `max_tokens`. At most 6 LLM calls per run. Rate limits per IP. Separate keys and spend limits for dev, eval and prod. Demo visitors only see replays.
-- **Validate early:** spike S2 measures cost per stage on hand-written evidence, and S2b re-measures it on the M2 skeleton.
-- **Fallback:** a cheaper model for RESOLVE and ASSESS (needs your approval; D4), or fewer ASSESS rounds.
+### R4 — API spend (retired)
+D9 removed paid APIs. The reservation mechanism survives with LLM seconds as its unit (ARCH §5.3).
 
 ### R5 — Wrong report that looks verified
 - **Mitigation:**
@@ -61,9 +63,8 @@ Bundled datasets ship with confirmed metrics. The QuestionSpec is confirmed befo
 ### R8 — Eval blind spots
 A realistic data generator, a calibration suite, seeds with CIs, driver precision and null specificity, an unconstrained-agent baseline, and a semi-synthetic real dataset. Known limits are written down.
 
-### R9 — Hosting
-- **Validate early:** spike S4 on the real target: a 1 GB machine with a volume, a 50 MB ingest, two concurrent queries, an SSE stream held through 6 minutes of silence with a heartbeat, a redeploy in the middle of a run, and peak memory recorded.
-- **Fallback:** Railway Hobby, or a 2 GB machine.
+### R9 — Hosting (retired)
+There's no hosted service. The static showcase is files on GitHub Pages, and the local app runs on the developer's machine.
 
 ### R10 — Scope
 - **Mitigation:** narrowed to one question type and one domain, with a walking skeleton first and upload moved late.
@@ -77,8 +78,44 @@ A realistic data generator, a calibration suite, seeds with CIs, driver precisio
 - **Mitigation:** WSL2 (recommended) and CI on Linux. Worker rlimits are Linux-only, so native Windows dev would need a "no rlimits" mode that is never used in prod.
 
 ### R13 — Structured-output schema limits
-- **Validate:** spike S2 also sends the step union with about 30 enum values and records whether it's accepted, plus latency and failure rate.
-- **Fallback:** plain string fields validated by code after parsing.
+- **Validate:** S2L sends the PLAN step union with about 30 enum values through Ollama's `format` and records parse and validation rates and latency.
+- **Fallback:** split PLAN into two smaller calls (pick dimensions, then parameters), or use plain string fields validated by code.
+
+### R14 — Local model quality (new)
+- **Why it matters:** a 4–8B model may pick bad dimensions, or write claims that keep failing VERIFY. Either would push runs into `incomplete_coverage`, or produce reports that read badly.
+- **What the probe showed (12 questions, not a gate):**
+  - Asking for half-open date windows directly scored 2–8/12.
+  - Asking for months scored 9–12/12.
+  - All three models produced valid JSON 12/12 times.
+- **Mitigation:**
+  - The model does no arithmetic, no dates and no SQL.
+  - Each call is one small schema with short context.
+  - Every output is validated, with one retry.
+  - Strength, outcome and coverage come from code.
+  - VERIFY is deterministic.
+- **Validate:** S2L and S6.
+- **Model doesn't follow the schema's intent** (seen in the probe: filling `month` and `months_ago` together): use one-of unions so there's exactly one way to say each thing.
+- **Fallback:** Guided mode (ARCH §5.5): the full playbook, code-written prose, and the same numbers and evidence, with the limitation stated in the README. That's an honest fallback, not a workaround.
+
+### R15 — Local latency (new)
+- **Probe numbers:**
+  - `gemma3:4b`: fully on the GPU, about 49 tok/s and about 4 s per RESOLVE call.
+  - `qwen3:8b`: about 70% on the GPU at a 4k context, about 17 tok/s and about 7 s per call.
+  - `gemma3:12b`: 37% on the GPU, about 7.5 tok/s and about 14 s per call.
+- **Mitigation:** small outputs, thinking off, a single GPU queue, one run at a time, and the model kept loaded between calls (`keep_alive`).
+- **Validate:** S2L's projected time per investigation, then S2b on the skeleton.
+- **Fallback:** a smaller model for RESOLVE only, or fewer ASSESS rounds.
+
+### R16 — Constrained decoding isn't validation (new)
+In the probe, Ollama's grammar didn't enforce a JSON-schema `pattern`. **Mitigation:** Pydantic and semantic validation on every output, one retry with the error, then a typed failure (ARCH §5.2). Tests feed malformed and semantically wrong outputs through `ScriptedProvider`.
+
+### R17 — Hardware-specific results (new)
+Published eval numbers come from one GPU. **Mitigation:**
+- the model is pinned by digest, with `temperature=0` and a fixed seed
+- hardware is recorded in every results file
+- re-run agreement is measured
+- `evals/run.py --model` lets anyone re-run the suite
+- the README says which machine produced the numbers
 
 ## Spikes
 
@@ -87,15 +124,20 @@ Spikes are time-boxed and throwaway. They live in `spikes/` and are not shipped.
 | Spike | When | Question | Done when | Size |
 |---|---|---|---|---|
 | **S1** Worker sandbox | M1 | Does the worker setup block or kill the worker-side attacks in security groups 1–4? Covers the root supervisor spawning a worker, dropping it to uid `cerno-worker`, empty env, rlimits, `unshare(CLONE_NEWNET)`, the locked config, and kill/respawn requested over a control socket. A stub process stands in for the API. The validator (group 5) is tested in M2. Also: do `interrupt()` and spill behave as documented on read-only files, and does opening the same file twice with different configs in one process conflict? Tested on a hand-built DuckDB file. | Every attack has a recorded outcome, config adjusted, and the network-isolation approach confirmed or a fallback documented | 1 day |
-| **S2** LLM cost, schema, cache | M1 | Using **hand-written evidence JSON** for 5 questions: tokens by type, cost, and latency for RESOLVE (30 questions at `low`, plus accuracy) and SYNTHESIZE (`medium`). Is the step-union structured-output schema accepted with about 30 enum values, and how long does the first call take? How many tokens is the dataset context, compared with the minimum cacheable length? | Provisional per-stage `max_tokens` and per-run cost estimate written to the journal | 1 day, < $10 |
-| **S2b** Re-measure on the skeleton | M2 (task 2.10) | Real end-to-end cost and latency on the M2 skeleton | Budget caps confirmed or revised | 2 hours, < $5 |
+| **S2L** Local model selection (replaces S2) | M1 | Which free local model fits the dev machine and passes RESOLVE, schema, latency and S6 criteria? | D4 decided, or Guided mode chosen as default | 1 day, $0 |
+| **S2b** Re-measure on the skeleton | M2 (task 2.10) | Real end-to-end latency on the M2 skeleton with the local model | Time limits confirmed or revised | 2 hours, $0 |
 | **S3** Hash determinism | M1 | Is the canonical hash stable across 50 runs, comparing threads=1 vs 4 and DOUBLE vs DECIMAL? | Hash policy confirmed | 2 hours |
-| **S4** Hosting | M1 (needs your OK to create a Fly account) | Does the topology work on a 1 GB machine? Uses throwaway stubs: a script that loads a 50 MB CSV into DuckDB, and a fake SSE run that idles for 6 minutes with heartbeats and gets redeployed mid-run. Also checks whether `unshare` and the uid switch work there. | R9 checklist passes or a fallback is chosen | 0.5 day |
-| **S6** Slot claims | M1 | Given hand-written evidence JSON from 3 scenarios, can the model write readable slot templates? Measure stray digits, invalid references, and readability over 20 reports. On the same reports, measure the error rate of a naive regex number check. | VERIFY design confirmed or adjusted | 0.5 day, ~$2 |
+| ~~**S4** Hosting~~ | — | Dropped under D9 | — | — |
+| **S6** Slot claims | M1 | Given hand-written evidence JSON from 3 scenarios, can the model write readable slot templates? Measure stray digits, invalid references, and readability over 20 reports. On the same reports, measure the error rate of a naive regex number check. Runs on the S2L candidates. | VERIFY design confirmed or adjusted | 0.5 day, $0 |
 
 S5 ("playbook with no LLM") is no longer a spike. It became the no-LLM baseline in M3, because it needs the real playbook.
 
 **Update (2026-11-15, M1 approval):**
 - You asked for statistical calibration in M1, so a new spike, **S7** (calibration of `baseline_compare` + BH), joins it.
-- **S4 is deferred** until just before M5.
-- The exact pass/fail criteria and results for S1, S2, S3, S6 and S7 live in `M1_SPIKES.md`.
+- S4 was deferred until just before M5. (D9 later dropped it.)
+- The exact pass/fail criteria and results live in `M1_SPIKES.md`.
+
+**Update (2026-11-15, D9):**
+- S2 becomes **S2L**, which selects a local model, and S6 runs on local models.
+- S4 is dropped, because nothing is hosted.
+- S3 has passed on Windows; its WSL re-run is pending.

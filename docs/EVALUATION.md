@@ -1,6 +1,6 @@
 # Cerno — Evaluation
 
-Status: **v1.1 draft** (2026-11-15). Revised after the architecture review (H18–H20, ML14, ML20) and the consistency check.
+Status: **v2.0 draft** (2026-11-15). v1.1 came from the architecture review. v2.0 makes the eval a **reproducible local benchmark** (D9): local models only, pinned by digest, with CI using scripted outputs.
 
 Evaluation happens in three layers, ordered from cheapest and most deterministic to most expensive:
 
@@ -8,7 +8,7 @@ Evaluation happens in three layers, ordered from cheapest and most deterministic
 |---|---|---|---|
 | 1. Tests | Code correctness, contracts, security boundaries | Scripted fakes | Every PR (CI) |
 | 2. Stats calibration | Whether the statistics are honest | No | ~200 seeds per PR; ≥ 1,000 nightly and at milestone sign-off |
-| 3. Agent eval | Whether investigations reach the right answer | Yes (live) | Manual; dev subset per change, full suite per milestone |
+| 3. Agent eval (local benchmark) | Whether investigations reach the right answer | Yes, a local model through Ollama | Manual on the dev machine; dev subset per change, full suite per milestone (overnight) |
 
 ## 1. Tests
 
@@ -31,7 +31,7 @@ Evaluation happens in three layers, ordered from cheapest and most deterministic
 
 ### Security tests
 
-Groups 1–5, 7–10 and 13 must pass before the first public deploy (milestone M5). Group 12 is added in M6, and groups 6 and 11 in M8, when upload and retention exist. In M2 only the worker-side parts of groups 1–4 can run, because there's no API yet.
+Groups 1–5, 7–10 and 13 must pass before the static showcase is first published (milestone M5). Group 12 is added in M6, and groups 6 and 11 in M8, when upload and retention exist. In M2 only the worker-side parts of groups 1–4 can run, because there's no API yet.
 
 1. **Sandbox:** inside the worker, file and network access fail or get killed. Covers:
    - `read_csv`, `read_text`, `read_blob`, `sniff_csv`, `parquet_metadata`
@@ -50,13 +50,20 @@ Groups 1–5, 7–10 and 13 must pass before the first public deploy (milestone 
 6. **Uploads (milestone M8):**
    - Rejected: oversize streams with a false Content-Length, Parquet bombs, 100k-column CSVs, a single 150 MB line, mismatched file types, and filenames with path traversal or quotes.
    - Displayed safely: column names like `__proto__` and bidi characters.
-7. **Cross-owner access:** every route returns 404 when given another owner's IDs.
-8. **Sessions:** no token ever appears in a URL, invite codes are stored only as hashes, and a bad credential gets a 401 that reveals nothing.
+7. **Ownership:** every route goes through `get_owned()`. A request with an ID that doesn't belong to the local principal returns 404, which keeps the multi-user escape route honest.
+8. **Local access (v2.0):**
+   - the server binds to 127.0.0.1 only
+   - a request with a foreign `Host` header (DNS rebinding) is rejected
+   - a cross-site form POST and a request without the session cookie are rejected
+   - the per-launch token never appears in a URL or a log after the exchange
+   - a non-localhost `CERNO_LLM_BASE_URL` without the override flag stops startup, and so do `localhost@evil.example`, `localhost.nip.io` and redirect-following
+   - a `*-cloud` model, or a model whose `/api/show` reports `remote_host`, is refused
+   - a POST with `text/plain`, or with a foreign `Origin`, is rejected
 9. **Injection end to end:** a fixture dataset whose values contain Markdown images, HTML, `javascript:` links and instruction text. The rendered report makes no outside request and runs no script, VERIFY rejects any URLs, and the values are flagged as caveats.
-10. **Budget races:** 10 concurrent runs against a $1 cap never exceed $1 plus one reservation, and an invite code with no budget left can't start a run.
+10. **Run limits:** a second concurrent run gets a 429, and a run whose LLM-time budget is used up ends `cut_short` with a report, using `ScriptedProvider` with injected delays.
 11. **Retention:** after the deletion job runs, no rows or files reference the deleted version.
 12. **Logs:** a cell value that appears in a conversion error does not show up in the logs.
-13. **CSP:** the header is on every route, with no inline scripts.
+13. **CSP:** the header is on every route of the local app, the `<meta>` CSP is on the showcase build, and there are no inline scripts. **Showcase export:** no absolute paths, hostnames, tokens, prompts or debug fields in the exported JSON, and runs stamped `isolation=off` or `remote_llm` are refused.
 
 ## 2. Stats calibration (H18)
 
@@ -115,18 +122,31 @@ Each metric is reported with a Wilson or bootstrap 95% CI.
 - **Specificity** on null and fake-signal scenarios. Target ≥ 90%. MULTIPLICITY controls the "any driver" false-positive rate near α = 0.05, so a calibrated system should land around 95%.
 - **Unsupported-claim rate before VERIFY**, plus VERIFY's false-reject rate against hand labels
 - Distribution of terminal states and outcomes
-- Cost and latency per run (p50, p90)
+- Latency per run (p50, p90) and LLM seconds per run. Dollar cost is $0 by construction.
 
 ### Baselines
-1. **Unconstrained ReAct agent:** same model, a read-only `run_sql` tool and the same budget. Its SQL runs through the same worker, with the validator in freehand mode. This is the main comparison, built in milestone M7.
-2. **Playbook with no LLM:** every dimension, no model choices. It shows what the LLM actually adds. Built in M3 (formerly spike S5).
+1. **Playbook with no LLM (Guided mode)** is the headline comparison. It answers what the model adds on top of the deterministic pipeline, and it costs nothing to run (review M3).
+2. **Unconstrained ReAct agent:** a read-only `run_sql` tool and the same LLM-time budget, run on the **strongest $0 configuration**, not just the product's model: the best tool-capable local model that fits, offloaded and/or with thinking on, run overnight. A small model in a tool loop alone would be a straw man. The README states the configuration. Its SQL runs through the same worker, with the validator in freehand mode. This is the main comparison, built in milestone M7.
+Both baselines are built in M3 (no-LLM, formerly spike S5) and M7 (ReAct).
 
 Comparisons are paired by question, and we report the paired difference with a bootstrap CI. Single-shot text-to-SQL and a "without VERIFY" ablation were dropped: the first is a straw man, and the pre-VERIFY unsupported-claim rate already measures what VERIFY catches.
 
 ### Size and cost
-- **Dev subset (milestone M3 on):** about 12 questions × 1 seed, Cerno only. Target ≤ $10 per run, to be repriced after spike S2.
-- **Milestone suite (milestone M7):** 50–80 questions × 3 seeds, plus null scenarios × at least 30 runs. That's roughly 180–270 runs per system, or about $90–200 for Cerno at $0.50–0.75 per run, and about the same again for ReAct. A $50/month dev budget can't pay for a full suite, so each one needs its own budget approval (D6).
-- Every results file records the git SHA, a hash of the prompts, the model and effort settings, and the seeds. Results go in `evals/results/`.
+Everything costs $0. The budget is GPU time on the dev machine.
+- **Dev subset (milestone M3 on):** about 12 questions × 1 seed, Cerno only. Target: under 45 minutes.
+- **Milestone suite (milestone M7):** 50–80 questions × 3 data seeds, plus null scenarios × at least 30 runs. That's roughly 180–270 runs per system.
+  - At an assumed ~2–3 minutes per run, that's about 6–13 hours per system, run overnight.
+  - S2L and S2b replace that assumption with measured numbers. If the suite won't fit in two nights, we cut questions before seeds.
+- **Reproducibility.** Every results file records:
+  - the git SHA and a hash of the prompts
+  - the provider, model tag and **model digest**, the quantization and the Ollama version
+  - `temperature=0`, the sampling seed and the data seeds
+  - the hardware (GPU, VRAM, RAM)
+  
+  Results go in `evals/results/`. With the weights pinned and greedy decoding, re-runs should match closely but not bit-for-bit, because GPU kernels aren't guaranteed deterministic. **Re-run agreement** is defined up front: the share of questions whose re-run gives the same outcome label *and* the same set of driver segments. It's measured by running the dev subset twice. The NVIDIA driver version is recorded too.
+- **The runner is resumable.** Each result is written as soon as it's done, and a re-start skips finished items. That survives laptop sleep and thermal throttling during overnight runs.
+- **Anyone can reproduce it:** `evals/run.py` takes `--model`. Someone with different hardware can re-run the suite and compare, and the README says the published numbers come from one specific machine.
+- **The LLM judge for wording is dropped.** A small local model judging itself is too weak to trust. Wording quality is hand-labeled instead: you rate a random sample of 30 reports against a short rubric, **blinded**, with reports shuffled and the system that wrote each one hidden. The deterministic checks (VERIFY, driver precision) do the rest.
 
 ### Regression
 Every bug found in an investigation becomes a new scenario or question.

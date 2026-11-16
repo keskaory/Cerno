@@ -77,3 +77,73 @@ You approved M0 and M1 and accepted WSL2 (D5) and the PR-based git workflow (D8)
 The spike criteria went into `M1_SPIKES.md` before any spike code was written, so they can't be tuned to fit the results.
 
 WSL wasn't installed and there's no API key yet. You're installing WSL, and I'm doing the platform-independent spikes (S3, S7) first.
+
+## 2026-11-15 — M0 done, S3 passes, then the plan changed: $0 and local-first
+
+**M0.**
+- **Commits:** branch `m0-tooling`, three focused commits plus one commit of review fixes. It's pushed, but the PR isn't open yet: `gh` isn't installed, and CI only runs on PRs.
+- **Review (subagent):** no blockers. Medium-severity findings:
+  - no `permissions:` block in CI
+  - pandas would fail strict mypy
+  - `runs/` and `*.parquet` were ignored too broadly
+  - spikes sat outside every check
+
+  All fixed. Spike checks join CI on the first spike branch.
+
+**S3 passed on Windows** (WSL2 re-run pending). Three findings mattered more than the pass:
+- At 4 threads, a ties-plus-LIMIT query returned different rows on all 50 runs, which confirms the "total ORDER BY" compiler rule.
+- DuckDB files built from the same Parquet aren't byte-identical, so the dataset fingerprint has to hash logical content.
+- `TimeZone` can't be set in `connect(config=...)` with autoload or external access off, because it's an ICU setting. It's `SET` after connect and then locked. I checked that every later `SET` fails once the lock is on.
+
+**Then you set D9:** $0 additional spending, and local-first. That retires the Claude API, Fly.io and every dollar budget. Implementation stopped so the plan could be revised and reviewed first.
+
+**Hardware:**
+- RTX 4050 Laptop, 6 GB VRAM
+- 15 GB RAM
+- Ryzen 7 7445HS
+- Ollama 0.40.16, already installed with `gemma3:4b` and `gemma3:12b`
+
+You approved downloading `qwen3:8b`. A license check by a subagent found everything planned is free. The conditions are recorded in D9: Gemma's custom terms, Olist's NC-SA license, and gitleaks only being free on personal accounts.
+
+**Preliminary probe** (`spikes/s2_local_llm/probe.py`, 12 RESOLVE-style questions plus 6 SQL questions; directional, not a gate):
+
+| Model | Share in VRAM | Decode speed | Windows, model writes dates | Months as `YYYY-MM` | Transcribe, code resolves | SQL |
+|---|---|---|---|---|---|---|
+| gemma3:4b | 100% | 49 tok/s | 2/12 | 9/12 | TBD | 6/6 |
+| qwen3:8b | 70% | 17 tok/s | 3/12 | 9/12 | TBD | 5/6 |
+| gemma3:12b | 37% | 7.6 tok/s | 8/12 | 12/12 | TBD | 6/6 |
+
+What I learned:
+- **Small models fail at arithmetic, not at reading.** The worst errors were inclusive end dates and picking the wrong year for "August". Moving date arithmetic into code is the same principle as "the model never writes numbers". So RESOLVE now transcribes the question ("month 8, no year", "1 month ago") and code resolves it.
+- **Constrained decoding isn't validation.** Ollama's grammar ignored a regex `pattern` in the schema. Every output gets Pydantic validation and one retry.
+- **My first SQL grader was wrong.** It compared whole rows, so a correct answer with month labels formatted differently counted as wrong. It now compares numbers only. The lesson: check the grader before believing a score.
+- **Speed falls off fast once a model spills out of VRAM.** At 37% on the GPU, `gemma3:12b` is about 6× slower than the 4B model.
+
+**The revised plan (v2.0):**
+- an `LLMProvider` interface with `OllamaProvider` and `ScriptedProvider`
+- Guided mode as an honest no-LLM fallback with identical numbers
+- budgets measured in LLM seconds
+- a local server locked to 127.0.0.1 with a per-launch token, instead of invite codes
+- a static replay showcase on GitHub Pages
+- a local benchmark pinned by model digest
+- S2 replaced by S2L (model selection), with criteria fixed before it runs and a newly written question set, because the probe questions shaped the schema
+
+**Review of v2.0 and fixes.** An independent reviewer found one critical problem, four high and five medium. The critical one was mine. I'd adopted the "transcribe" RESOLVE schema even though its only measurement so far was 4/12 on `gemma3:4b`, below the months schema's 9/12, and I'd written "TBD" in the docs while that number was already sitting in the output file. The cause was the schema itself: it required `year`, `month` and `months_ago` all at once, so the model filled two of them ("October, 1 month ago"). Lesson: **a schema that allows contradictions will get them.** It's now a one-of union. The other main fixes:
+- refuse Ollama `-cloud` models, which are served from localhost but run remotely
+- require WSL mirrored networking, so Ollama never listens on 0.0.0.0
+- use one fixed `num_ctx`, with a typed overflow error
+- a confirmatory BH family that's the same in both modes, so PLAN can't prune dimensions
+
+Full log: `reviews/2026-11-15-local-first-review.md`.
+
+**Git attribution.** You don't want Claude listed as a GitHub contributor. Five pushed commits carried a `Co-Authored-By: Claude` trailer. With your explicit approval, I rebuilt them with identical trees, authors and dates, minus the trailer, and force-pushed `main` and `m0-tooling` with `--force-with-lease`. New hashes: `main` is at `5baae19`, `m0-tooling` at `6550614`. Future commits and PRs carry no AI attribution (CLAUDE.md).
+
+**Probe v2 results** (one probe version `dcca7674e90c699d`, Ollama 0.40.16, all Q4_K_M, `remote_host` null for all three; summaries in `spikes/s2_local_llm/results/`):
+
+| Model (digest) | Share in VRAM | Decode speed | Windows | Months | Transcribe v1 | Transcribe v2 (union) | p50 per call |
+|---|---|---|---|---|---|---|---|
+| gemma3:4b (`68ceab7e`) | 100% | 48 tok/s | 2/12 | 9/12 | 4/12 | 5/12 | 4.0 s |
+| qwen3:8b (`500a1f06`) | 70% | 18 tok/s | 3/12 | 9/12 | 7/12 | 7/12 | 6.6 s |
+| gemma3:12b (`b92b2185`) | 37% | 7.8 tok/s | 8/12 | 12/12 | — | 12/12 | 13.4 s |
+
+The union fixed the contradiction bug but didn't help the small models. They still map "August" to a relative month, and `qwen3:8b` turned "last month" into November 2024. The 4–8B models do best on the simplest schema (months). Only the 12B model gets everything right, but it's partly on the CPU and about 3× slower. All three substituted a known metric for an unknown one at least once ("churn" → orders_count) in some mode. That's why S2L now has a zero-substitution gate. The probe has 12 questions, so these numbers are directional only.
