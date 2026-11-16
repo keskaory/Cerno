@@ -28,6 +28,11 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run mypy cerno tests
       - run: uv run pytest -m "not live"
+      # Throwaway M1 spikes: linted, typed and tested so their results can be trusted.
+      # Each spike dir is type-checked on its own because spikes reuse module names.
+      - run: uv run ruff check ../spikes && uv run ruff format --check ../spikes
+      - run: for d in ../spikes/*/; do uv run mypy "$d" || exit 1; done
+      - run: uv run pytest -m "not live" ../spikes
 
   secrets:
     runs-on: ubuntu-24.04
