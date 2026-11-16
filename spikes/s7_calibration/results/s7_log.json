@@ -1,0 +1,285 @@
+{
+ "env": {
+  "python": "3.12.16",
+  "numpy": "2.5.5",
+  "scipy": "1.18.1",
+  "statsmodels": "0.15.0",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "config": {
+   "orders_per_day": 400.0,
+   "region_w": [
+    0.35,
+    0.3,
+    0.2,
+    0.15
+   ],
+   "channel_w": [
+    0.5,
+    0.3,
+    0.2
+   ],
+   "nb_shape": 5.0,
+   "value_mu": 3.6,
+   "value_sigma": 0.8,
+   "weekly_amp": 0.15,
+   "ar_phi": 0.5,
+   "ar_sd": 0.05,
+   "month_shared_sd": 0.03,
+   "month_cell_sd": 0.04
+  }
+ },
+ "region_sd_revenue_per_day": [
+  486.37,
+  421.76,
+  284.67,
+  220.21
+ ],
+ "null_flat": {
+  "n": 1000,
+  "any_driver_rate_bh": 0.036,
+  "any_driver_rate_bh_wilson95": [
+   0.0261,
+   0.0494
+  ],
+  "any_driver_rate_by": 0.013,
+  "any_raw_p_below_alpha_rate": 0.259,
+  "total_pi_coverage": 0.955,
+  "total_pi_coverage_wilson95": [
+   0.9403,
+   0.9662
+  ],
+  "flag_rate_by_segment_bh": {
+   "total": 0.01,
+   "r0": 0.006,
+   "r1": 0.013,
+   "r2": 0.002,
+   "r3": 0.009,
+   "c0": 0.009,
+   "c1": 0.006,
+   "c2": 0.003
+  }
+ },
+ "null_trend": {
+  "n": 1000,
+  "any_driver_rate_bh": 0.051,
+  "any_driver_rate_bh_wilson95": [
+   0.039,
+   0.0664
+  ],
+  "any_driver_rate_by": 0.02,
+  "any_raw_p_below_alpha_rate": 0.282,
+  "total_pi_coverage": 0.948,
+  "total_pi_coverage_wilson95": [
+   0.9324,
+   0.9601
+  ],
+  "flag_rate_by_segment_bh": {
+   "total": 0.017,
+   "r0": 0.016,
+   "r1": 0.006,
+   "r2": 0.013,
+   "r3": 0.011,
+   "c0": 0.014,
+   "c1": 0.018,
+   "c2": 0.007
+  }
+ },
+ "seasonal_null": {
+  "n": 500,
+  "any_driver_rate_bh": 0.016,
+  "any_driver_rate_bh_wilson95": [
+   0.0081,
+   0.0313
+  ],
+  "any_driver_rate_by": 0.008,
+  "any_raw_p_below_alpha_rate": 0.17,
+  "total_pi_coverage": 0.964,
+  "total_pi_coverage_wilson95": [
+   0.9438,
+   0.9771
+  ],
+  "flag_rate_by_segment_bh": {
+   "total": 0.008,
+   "r0": 0.006,
+   "r1": 0.006,
+   "r2": 0.002,
+   "r3": 0.006,
+   "c0": 0.006,
+   "c1": 0.01,
+   "c2": 0.006
+  }
+ },
+ "null_month_ar_reported_only": {
+  "rho": 0.4,
+  "n": 500,
+  "any_driver_rate_bh": 0.044,
+  "any_driver_rate_bh_wilson95": [
+   0.0292,
+   0.0657
+  ],
+  "any_driver_rate_by": 0.016,
+  "any_raw_p_below_alpha_rate": 0.28,
+  "total_pi_coverage": 0.94,
+  "total_pi_coverage_wilson95": [
+   0.9156,
+   0.9577
+  ],
+  "flag_rate_by_segment_bh": {
+   "total": 0.014,
+   "r0": 0.008,
+   "r1": 0.006,
+   "r2": 0.006,
+   "r3": 0.006,
+   "c0": 0.014,
+   "c1": 0.008,
+   "c2": 0.01
+  }
+ },
+ "shift_d1": {
+  "n": 300,
+  "power": 0.05,
+  "power_wilson95": [
+   0.0305,
+   0.0808
+  ],
+  "non_planted_region_flag_rate": [
+   0.0089,
+   0.0044,
+   0.0133,
+   0.0133
+  ],
+  "max_non_planted_region_flag_rate": 0.0133,
+  "non_planted_wilson95": [
+   [
+    0.0024,
+    0.0318
+   ],
+   [
+    0.0008,
+    0.0247
+   ],
+   [
+    0.0045,
+    0.0385
+   ],
+   [
+    0.0045,
+    0.0385
+   ]
+  ]
+ },
+ "shift_d2": {
+  "n": 300,
+  "power": 0.22,
+  "power_wilson95": [
+   0.1768,
+   0.2703
+  ],
+  "non_planted_region_flag_rate": [
+   0.0089,
+   0.0133,
+   0.0044,
+   0.0133
+  ],
+  "max_non_planted_region_flag_rate": 0.0133,
+  "non_planted_wilson95": [
+   [
+    0.0024,
+    0.0318
+   ],
+   [
+    0.0045,
+    0.0385
+   ],
+   [
+    0.0008,
+    0.0247
+   ],
+   [
+    0.0045,
+    0.0385
+   ]
+  ]
+ },
+ "shift_d3": {
+  "n": 300,
+  "power": 0.4867,
+  "power_wilson95": [
+   0.4306,
+   0.543
+  ],
+  "non_planted_region_flag_rate": [
+   0.0089,
+   0.0133,
+   0.0133,
+   0.0267
+  ],
+  "max_non_planted_region_flag_rate": 0.0267,
+  "non_planted_wilson95": [
+   [
+    0.0024,
+    0.0318
+   ],
+   [
+    0.0045,
+    0.0385
+   ],
+   [
+    0.0045,
+    0.0385
+   ],
+   [
+    0.0123,
+    0.0569
+   ]
+  ]
+ },
+ "shift_d4": {
+  "n": 300,
+  "power": 0.7667,
+  "power_wilson95": [
+   0.7156,
+   0.811
+  ],
+  "non_planted_region_flag_rate": [
+   0.0178,
+   0.0133,
+   0.0044,
+   0.0133
+  ],
+  "max_non_planted_region_flag_rate": 0.0178,
+  "non_planted_wilson95": [
+   [
+    0.0069,
+    0.0448
+   ],
+   [
+    0.0045,
+    0.0385
+   ],
+   [
+    0.0008,
+    0.0247
+   ],
+   [
+    0.0045,
+    0.0385
+   ]
+  ]
+ },
+ "formula_check": {
+  "n": 100,
+  "max_abs_diff_se": 7.105427357601002e-15,
+  "max_abs_diff_p": 8.326672684688674e-15
+ },
+ "criteria": {
+  "1_false_positives": true,
+  "2_coverage": true,
+  "3_power_d3": false,
+  "4_precision": true,
+  "5_formula": true
+ },
+ "passed": false,
+ "elapsed_s": 13.8,
+ "scale": "log"
+}
