@@ -1,0 +1,21 @@
+{
+  "model": "qwen3:8b",
+  "digest": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41",
+  "quantization": "Q4_K_M",
+  "remote_host": null,
+  "ollama_version": "0.40.16",
+  "num_ctx": 4096,
+  "probe_sha256": "dcca7674e90c699d",
+  "size_gb": 5.99,
+  "vram_fraction": 0.7,
+  "resolve_valid": "12/12",
+  "resolve_correct": "3/12",
+  "windows_correct": "3/12",
+  "months_correct": "9/12",
+  "transcribe_correct": "7/12",
+  "resolve_p50_s": 6.59,
+  "resolve_max_s": 6.98,
+  "decode_tok_s_median": 18.4,
+  "sql_runs": "6/6",
+  "sql_correct": "5/6"
+}

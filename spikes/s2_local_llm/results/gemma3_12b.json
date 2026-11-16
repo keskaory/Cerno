@@ -1,0 +1,21 @@
+{
+  "model": "gemma3:12b",
+  "digest": "b92b218582c521ba287f38f1d6057dcd3c6cbff036f13cac97b5d861f5e58ec3",
+  "quantization": "Q4_K_M",
+  "remote_host": null,
+  "ollama_version": "0.40.16",
+  "num_ctx": 4096,
+  "probe_sha256": "dcca7674e90c699d",
+  "size_gb": 8.93,
+  "vram_fraction": 0.37,
+  "resolve_valid": "12/12",
+  "resolve_correct": "8/12",
+  "windows_correct": "8/12",
+  "months_correct": "12/12",
+  "transcribe_correct": "12/12",
+  "resolve_p50_s": 13.38,
+  "resolve_max_s": 13.7,
+  "decode_tok_s_median": 7.8,
+  "sql_runs": "6/6",
+  "sql_correct": "6/6"
+}
