@@ -1,6 +1,6 @@
 # Cerno — Product Spec
 
-Status: **v1.1 draft** (2026-11-15). Revised after the architecture review and the consistency checks. Items marked `ASSUMPTION` are defaults that are still unconfirmed. Pending decisions are listed in `DECISIONS.md`.
+Status: **v2.0 draft** (2026-11-15). Revised for D9: built and demoed for $0, and runs entirely on your own machine. Items marked `ASSUMPTION` are defaults that are still unconfirmed. Pending decisions are listed in `DECISIONS.md`.
 
 ## One-line description
 
@@ -39,9 +39,14 @@ Driver decomposition already exists in BI tools, and LLM data analysis exists in
   - a seeded e-commerce dataset (demo plus eval), with metrics and dimensions defined in YAML
   - a semi-synthetic dataset built from the public Olist e-commerce data with injected effects
 - **QuestionSpec confirmation:** Cerno shows how it read the question (metric, periods, dimensions) as editable chips before it runs. It never stops mid-run to ask.
-- **Live run view:** the plan as a checklist, streamed steps with SQL and results, a cost and time display, and a cancel button.
+- **Live run view:** the plan as a checklist, streamed steps with SQL and results, elapsed time, the model in use and LLM seconds, and a cancel button.
 - **Report:** a three-sentence answer, claims with strength badges, numbers that open the evidence behind them, an investigation timeline, caveats, and an appendix of claims that were dropped.
-- **Public replays** of pre-run demo investigations, which cost nothing to view. Live runs need a per-person invite code.
+- **Local app:** `cerno serve` on your own machine, with a local model through Ollama. Nothing is sent anywhere.
+- **Two modes:**
+  - **Full:** free-text questions and LLM-written prose.
+  - **Guided:** a form and code-written prose.
+  Guided mode works with no model at all. The numbers and evidence are identical in both modes (ARCH §5.5).
+- **Static showcase:** pre-run demo investigations on GitHub Pages, explorable down to every number's SQL. It can't run new questions, and it says so.
 
 **Before "v1 done", in later milestones:**
 - Upload of CSV/Parquet files (≤ 50 MB, ≤ 10 tables) with a type review, key and join confirmation, and metric definitions that Cerno proposes and the user confirms.
@@ -55,7 +60,7 @@ Driver decomposition already exists in BI tools, and LLM data analysis exists in
 ## User journeys
 
 1. **First visit (recruiter):** open a demo report → read the answer → click a number to see its SQL and result → open the timeline to see one hypothesis that was dropped as within normal variation → watch the eval summary.
-2. **Live run (invite code):** pick a dataset → ask a question → confirm or edit the QuestionSpec chips → watch the run stream → get the report.
+2. **Live run (local):** install, then run `cerno serve` and pick a dataset → ask a question → confirm or edit the QuestionSpec chips → watch the run stream → get the report.
 3. **Bring your own data (later milestone):** upload → review types → confirm keys, joins and two or three metrics → ask.
 
 ## Success criteria
@@ -64,17 +69,16 @@ These are the starting targets. The real bar gets set after the baseline is meas
 - **Driver recall and precision** on planted effects: higher than the unconstrained agent baseline, with the paired difference's CI above zero.
 - **Specificity on null scenarios:** ≥ 90% of null runs report no meaningful driver.
 - **Unsupported claims before VERIFY:** measured and reported. After VERIFY, no unverified claim is shown as verified.
-- **Cost and latency:** p50 ≤ $0.50 and ≤ 3 minutes per investigation, with a hard cap of $0.75 per run. These are provisional and get revised after spikes S2 and S2b.
+- **Cost:** $0 to build, run, evaluate and demo (D9).
+- **Latency** on the dev machine (RTX 4050 6 GB): LLM time p50 ≤ 180 s and p90 ≤ 300 s per investigation, with the model already loaded. Provisional until S2L and S2b.
 - **Understanding:** 2–3 people unfamiliar with the project can follow the 2-minute replay path without help.
 
 ## Privacy and security expectations
 
-- **What reaches Anthropic:** schema, metric definitions, column profiles, and **up to 50 aggregated result rows per step**, plus a few example values per column in profiles. Bulk tables are never sent. The privacy notice states this, names every processor (Anthropic, the hosting provider), and gives retention periods.
+- **Nothing leaves your machine.** The model runs locally. The server refuses a non-localhost LLM URL unless you explicitly override it (ARCH §2.7). Prompts still carry only the schema, metric definitions, profiles and at most 50 aggregated rows per step. That limit isn't about privacy any more: it keeps prompts small enough for a local model.
 - `ASSUMPTION` In v1, only bundled data and public or synthetic uploads are expected. The "don't upload sensitive data" notice is a warning, not a control. Deletion and retention are built as if people will ignore it.
 - **Read-only access** is enforced by the compute worker and the DuckDB configuration, not by prompts.
 
 ## Cost envelope
 
-- **Hosting:** about $7–12/month (one small Fly.io machine with a volume).
-- **API:** a development budget per month **[D6, D4]**. In production, a global daily cap plus per-invite-code budgets.
-- **Full evaluation run:** priced from spike S2 before it's scheduled.
+**$0 (D9).** Everything used is free and open source, or free for public repos. See DECISIONS → D9 for the checked list. The constraint is GPU time instead: the full M7 benchmark runs overnight on the dev machine.
