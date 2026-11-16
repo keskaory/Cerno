@@ -174,3 +174,45 @@ You approved v2.0 and asked for the S2L questions and criteria to be frozen befo
 **Rule from here:** if a model fails, the thresholds stay. A harness bug found after a run gets fixed in a new commit, every model is re-run, and the journal says what changed and why. A threshold change needs your approval.
 
 **Harness tests (71)** check that every question can be answered with its gold answer, that Guided mode passes VERIFY on all scenarios, that each VERIFY rule fires, and the rendering and stats helpers. A low score should mean the model failed, not the harness.
+
+## 2026-11-15: Review found the v1 harness too lax; v2 frozen, v1 run stopped
+
+An independent review of the spike code found 16 issues (`reviews/2026-11-15-m1-spikes-review.md`). The serious ones made the S2L/S6 gates easier to pass than the spec says:
+- substitutions that landed on an out-of-range month weren't counted
+- a claim could name the wrong region in plain text
+- the direction check gave up on any sentence with both "fell" and "rose"
+- PLAN extras could use out-of-scope dimensions
+
+Several of the fixes feed the retry and repair loop, so they can't be applied by re-scoring saved outputs. The v1 run had been going for about 8 minutes on `gemma3:4b` and hadn't written any results. I stopped it. Nobody looked at any v1 model output.
+
+**What changed in v2:** scoring, VERIFY, PLAN/ASSESS checks, one schema form (`same_month_last_year`, for R05), and two prompt lines saying "only in-scope dimensions" and "segment names go in label slots". **No threshold changed, and the 40 questions are byte-identical** (same hash as v1).
+
+**v2 hashes** (the same files as v1, working tree at freeze, LF line endings):
+
+| File | SHA-256 |
+|---|---|
+| questions.json | `55e21b750e91e4bd93ad4616b7d88ca8cce8df6c05105b19fc64833556bc7f23` (unchanged) |
+| resolve.py | `8cf26a8fb386c5f0946b124e56dcde422da7e8b9b6157dc42974d6ee4feee4c5` |
+| plan.py | `d5c44696128d40fa13849cd10c1d5bd4e6ce991f2033a10072423027005a3ced` |
+| synth.py | `57679fe77387939bbd85493a91486a8118907c9bd817f7462c9c7c7d0eb9cc27` |
+| client.py | `531e720e41154d17e8ec782767bf1cab2b8a0e99673e763f7936e65654b851b8` |
+| run.py | `ac2aa3e61ed894ff4f2746cf51732d36f05adda0c22cc7374f65d30d2af18637` |
+| test_s2l_harness.py | `a5fe0d8a2d1f11c1eac4ba81a79d61ad3978f2f2e4c275912eacfd1a885bdc41` |
+| M1_SPIKES.md lines 123–253 (S2L + S6) | `31be64980a048ad0609139c1e79b5d8710a33079a22f4337a03c25320d06b2a5` |
+
+**S7 ran (10 s on CPU) and fails.** Results: `spikes/s7_calibration/results/s7.json`.
+
+| Criterion | Levels (ARCH §6 as written) | Log levels (candidate) |
+|---|---|---|
+| 1. any-driver rate ≤ 0.069, flat / trend | 0.040 / **0.107** ✗ | 0.036 / 0.051 ✓ |
+| 2. PI coverage in [0.932, 0.968], flat / trend | 0.955 / **0.925** ✗ | 0.955 / 0.948 ✓ |
+| 3. power at d = 3 ≥ 0.80 | **0.37** ✗ | **0.49** ✗ |
+| 4. non-planted region flags ≤ 0.05 | 0.022 max ✓ | 0.027 max ✓ |
+| 5. formula = statsmodels to 1e-9 | 7e-15 ✓ | 7e-15 ✓ |
+
+Why:
+- **Trend failure: heteroskedasticity.** Business noise scales with the level. In a growing series, the newest month is noisier than the average month the fit learned from, so the interval is too narrow exactly where it's used. On log levels the noise is roughly constant, and calibration comes back. A diagnostic that removed the multiplicative shocks still failed in levels, because Poisson and lognormal order noise also grows with the level.
+- **Power failure: short history plus 8 tests.** With 12–23 months and BH over 8 p-values, a drop of 3 residual SDs is caught 37% of the time in levels and 49% in logs. Without the BH correction, it's 72% (diagnostic). 80% power needs about 5 SDs in levels. That's a property of the data and the test, not a bug. The 0.80 bar was a guess made before measuring.
+- **Reported only:** with seasonality (±10%) the method is *conservative* (any-driver 0.018), because the sine wave inflates the residual SD. With AR(1) monthly shocks at ρ = 0.4, any-driver is 0.052 in levels and 0.044 in logs, inside the band but closer to it.
+
+I haven't changed the method or the bar. Both are your call at the checkpoint: switching `baseline_compare` to log levels (an ARCH §6 change), and either accepting a lower power bar or reporting the MDE honestly.

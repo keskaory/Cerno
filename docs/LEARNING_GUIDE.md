@@ -69,6 +69,9 @@ uv run ruff check . && uv run mypy cerno tests && uv run pytest
 **Check yourself:**
 1. What does `--locked` protect against in CI?
 2. Why does the `cerno` package have no runtime dependencies yet, even though spikes use DuckDB?
+3. CI runs on Ubuntu while you develop on Windows. Name one bug that setup catches and one it can't.
+4. `--strict-markers` is on. What happens if you write `@pytest.mark.lvie` by mistake, and what would happen without the flag?
+5. Why does the `live` marker exist, and why is `-m "not live"` the default in CI?
 
 ---
 

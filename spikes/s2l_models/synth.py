@@ -285,38 +285,106 @@ def render(claim: Claim, ev: dict[str, Any]) -> str:
 
 # --- VERIFY -------------------------------------------------------------------------------
 
-UP = {
-    "rose",
-    "increased",
-    "increase",
-    "increases",
-    "grew",
-    "higher",
-    "up",
-    "gained",
-    "improved",
-    "rise",
-    "jumped",
-}
-DOWN = {
-    "fell",
-    "decreased",
-    "decrease",
-    "decreases",
-    "declined",
-    "decline",
-    "dropped",
-    "drop",
-    "lower",
-    "down",
-    "shrank",
-    "fall",
-    "falls",
-    "slipped",
-}
-DRIVER = ("drove", "driver", "driving", "behind the", "responsible for")
-CAUSAL = ("caused", "because", "due to", "led to", "as a result")
+UP = set(
+    [
+        "rose",
+        "rise",
+        "rises",
+        "rising",
+        "increased",
+        "increase",
+        "increases",
+        "increasing",
+        "grew",
+        "grow",
+        "grows",
+        "growing",
+        "higher",
+        "up",
+        "gained",
+        "gain",
+        "gains",
+        "improved",
+        "improve",
+        "jumped",
+        "climbed",
+        "climb",
+        "above",
+    ]
+)
+DOWN = set(
+    [
+        "fell",
+        "fall",
+        "falls",
+        "falling",
+        "decreased",
+        "decrease",
+        "decreases",
+        "decreasing",
+        "declined",
+        "decline",
+        "declines",
+        "declining",
+        "dropped",
+        "drop",
+        "drops",
+        "dropping",
+        "lower",
+        "down",
+        "shrank",
+        "shrink",
+        "slipped",
+        "dipped",
+        "dip",
+        "slid",
+        "below",
+    ]
+)
+DRIVER = re.compile(r"\b(drove|drive|drives|driver|drivers|driving|responsible for)\b")
+CAUSAL = re.compile(r"\b(caused|causes|because|due to|led to|as a result)\b")
 PLACEHOLDER = re.compile(r"\{([a-z][a-z0-9_]*)\}")
+SEGMENT_NAMES = re.compile(r"\b(" + "|".join(REGIONS + CHANNELS) + r")\b", re.IGNORECASE)
+# Which formats each evidence field may be shown in. Every metric in S6 is money-valued.
+FIELD_FMTS = {
+    "segment": {"label"},
+    "delta_pct": {"pct", "pct_abs"},
+    "unexpected_pct": {"pct", "pct_abs"},
+    "share_of_change": {"pct", "pct_abs"},
+    **{
+        f: {"money", "money_abs"}
+        for f in (
+            "delta",
+            "unexpected",
+            "comparison_value",
+            "baseline_value",
+            "rate_effect",
+            "mix_effect",
+            "total_effect",
+        )
+    },
+}
+
+
+def offsetting(item: dict[str, Any]) -> bool:
+    """ARCH §6: shares of change are meaningless when gross movement > 3x the net change."""
+    deltas = [r["delta"] for r in item.get("rows", []) if "delta" in r]
+    net = sum(deltas)
+    return bool(deltas) and sum(abs(d) for d in deltas) > 3 * abs(net)
+
+
+def _direction_word(template: str, pos: int) -> str | None:
+    """The direction word nearest to character position `pos`, as "up", "down" or None."""
+    best: tuple[int, str] | None = None
+    for m in re.finditer(r"[A-Za-z]+", PLACEHOLDER.sub(lambda x: " " * len(x[0]), template)):
+        w = m[0].lower()
+        side = "up" if w in UP else "down" if w in DOWN else None
+        if side is None:
+            continue
+        dist = min(abs(m.start() - pos), abs(m.end() - pos))
+        if best is None or dist < best[0]:
+            best = (dist, side)
+    return best[1] if best else None
 
 
 def verify(out: SynthOut, ev: dict[str, Any]) -> list[str]:
@@ -336,6 +404,8 @@ def verify(out: SynthOut, ev: dict[str, Any]) -> list[str]:
             errors.append(f"{where}: stray brace; placeholders look like {{name}}")
         if re.search(r"\d", bare):
             errors.append(f"{where}: digits in template text; every number must be a slot")
+        if SEGMENT_NAMES.search(bare):
+            errors.append(f"{where}: segment names must come from label slots, not template text")
         refs_ok = True
         for s in c.slots:
             try:
@@ -344,25 +414,44 @@ def verify(out: SynthOut, ev: dict[str, Any]) -> list[str]:
             except (KeyError, TypeError) as e:
                 errors.append(f"{where}: {e}")
                 refs_ok = False
+                continue
             m = REF.match(s.ref)
-            if m and m[2]:
+            assert m is not None  # resolve_ref succeeded
+            field_name = m[3]
+            if s.fmt not in FIELD_FMTS.get(field_name, {s.fmt}):
+                errors.append(f"{where}: {field_name} cannot be shown as {s.fmt}")
+            if field_name == "share_of_change" and offsetting(ev[m[1]]):
+                errors.append(
+                    f"{where}: movements in {m[1]} offset each other; say so instead of a share"
+                )
+            if m[2]:
                 mentioned.add(m[2])
         low = bare.lower()
-        words = set(re.findall(r"[a-z]+", low))
         if refs_ok:
-            signed = next((s for s in c.slots if s.ref.rsplit(".", 1)[-1] in SIGNED), None)
-            if signed is not None:
-                v = resolve_ref(ev, signed.ref)
-                if words & UP and not words & DOWN and v < 0:
-                    errors.append(f"{where}: says up/increase but {signed.ref} is negative")
-                if words & DOWN and not words & UP and v > 0:
-                    errors.append(f"{where}: says down/decrease but {signed.ref} is positive")
-        seg_refs = {m[2] for s in c.slots if (m := REF.match(s.ref)) and m[2]}
-        if any(d in low for d in DRIVER) and not seg_refs & flags:
-            errors.append(
-                f"{where}: driver wording without a segment that is beyond normal variation"
-            )
-        if any(w in low for w in CAUSAL):
+            # Check each signed slot against the direction word nearest to it, so
+            # "{a} fell by {x} while {b} rose by {y}" is checked clause by clause.
+            for s in c.slots:
+                if s.ref.rsplit(".", 1)[-1] not in SIGNED:
+                    continue
+                pos = c.template.find("{" + s.name + "}")
+                side = _direction_word(c.template, pos) if pos >= 0 else None
+                v = resolve_ref(ev, s.ref)
+                if side == "up" and v < 0:
+                    errors.append(f"{where}: says up/increase but {s.ref} is negative")
+                if side == "down" and v > 0:
+                    errors.append(f"{where}: says down/decrease but {s.ref} is positive")
+        if DRIVER.search(low):
+            labels = {
+                m[2]
+                for s in c.slots
+                if s.fmt == "label" and (m := REF.match(s.ref)) and m[2] is not None
+            }
+            if not labels or not labels <= flags:
+                errors.append(
+                    f"{where}: driver wording needs every named segment to be beyond normal "
+                    "variation"
+                )
+        if CAUSAL.search(low):
             errors.append(f"{where}: causal wording is not allowed")
         if "significant" in low:
             errors.append(f"{where}: do not use the word 'significant'")
@@ -376,7 +465,7 @@ def verify(out: SynthOut, ev: dict[str, Any]) -> list[str]:
 
 
 def driver_claims(out: SynthOut) -> int:
-    return sum(any(d in c.template.lower() for d in DRIVER) for c in [out.headline, *out.claims])
+    return sum(bool(DRIVER.search(c.template.lower())) for c in [out.headline, *out.claims])
 
 
 def has_digits(out: SynthOut) -> bool:
@@ -401,8 +490,12 @@ Rules:
   money | money_abs | pct | pct_abs | number | label. Use label for segment names and the
   _abs formats after a direction word ("fell by {drop}" with pct_abs).
 - Reference syntax: ev_name.field, or ev_name.rows[segment=X].field
+- Segment names (regions, channels) always go in label slots, never in the template text.
 - Mention every segment whose q is below 0.05. Do not call a segment a driver ("drove",
   "driver", "responsible for") unless its q is below 0.05.
+- Percent fields use pct or pct_abs; money fields use money or money_abs.
+- If segment changes in a decomposition mostly offset each other, say the movements offset
+  instead of quoting a share of change.
 - Direction words (rose, fell, up, down) must match the sign of the numbers they describe.
 - No causal words (caused, because, due to, led to), no "significant", no links or markup.
 - Do not restate the overall outcome; code writes it."""
@@ -473,7 +566,15 @@ def guided(sc: dict[str, Any]) -> SynthOut:
                 slots=[],
             )
         )
-    if "ev_dec_region" in ev:
+    if "ev_dec_region" in ev and offsetting(ev["ev_dec_region"]):
+        claims.append(
+            Claim(
+                template="Regional movements largely offset each other, so no single region "
+                "accounts for a meaningful share of the change.",
+                slots=[],
+            )
+        )
+    elif "ev_dec_region" in ev:
         top = max(ev["ev_dec_region"]["rows"], key=lambda r: abs(r["delta"]))
         ref = f"ev_dec_region.rows[segment={top['segment']}]"
         claims.append(

@@ -117,8 +117,15 @@ def run_resolve(model: str, data: dict[str, Any]) -> dict[str, Any]:
             "wrong": [i for i in items if not i["correct"]],
             "_records": [r.to_json() for r in records],
         }
+    # "Better" means: passes the RESOLVE gate (>= 36 correct, 0 substitutions) first, then more
+    # correct, then fewer substitutions. A schema that passes beats one that scores higher.
     best = max(
-        ("months", "transcribe"), key=lambda s: (out[s]["correct"], -out[s]["substitutions"])
+        ("months", "transcribe"),
+        key=lambda s: (
+            out[s]["correct"] >= 36 and out[s]["substitutions"] == 0,
+            out[s]["correct"],
+            -out[s]["substitutions"],
+        ),
     )
     out["best_schema"] = best
     return out
@@ -226,7 +233,8 @@ def run_synth(model: str, scenarios: list[tuple[str, int]], think: bool = False)
         reports.append(rep)
     first = [r["attempts"][0] for r in reports if r["attempts"]]
     n_claims = sum(len(a["output"]["claims"]) + 1 for a in first)
-    bad_refs = sum(sum(1 for e in a["errors"] if "no " in e or "bad reference" in e) for a in first)
+    ref_error = ("bad reference syntax", "no evidence", "has no row", ": no field")
+    bad_refs = sum(sum(1 for e in a["errors"] if any(x in e for x in ref_error)) for a in first)
     completed = [r for r in reports if r["status"] == "completed"]
     null_reports = [r for r in reports if r["scenario"] == "c"]
     a_done = [r for r in completed if r["scenario"] == "a"]
@@ -234,7 +242,8 @@ def run_synth(model: str, scenarios: list[tuple[str, int]], think: bool = False)
         "completed": len(completed),
         "n": len(reports),
         "repaired": sum(bool(r.get("repaired")) for r in completed),
-        "repair_rate": round(sum(len(r["attempts"]) > 1 for r in reports) / len(reports), 3),
+        # Share of reports that needed a repair call, whether or not the repair parsed.
+        "repair_rate": round(sum(r.stage == "synth_repair" for r in records) / len(reports), 3),
         "null_driver_claims_pre_verify": sum(
             r["attempts"][0]["driver_claims"] for r in null_reports if r["attempts"]
         ),

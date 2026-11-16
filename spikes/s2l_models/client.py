@@ -102,7 +102,8 @@ def call(
     rec = CallRecord(stage)
     fmt = inline_refs(schema.model_json_schema())
     messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-    for _ in range(2):
+    validation_tries, transport_tries = 0, 0
+    while validation_tries < 2 and transport_tries < 2:
         body = {
             "model": model,
             "messages": messages,
@@ -119,7 +120,9 @@ def call(
             rec.attempts.append(
                 Attempt(time.perf_counter() - t0, 0, 0, 0, 0, "", "transport", str(e))
             )
+            transport_tries += 1  # a dropped connection doesn't use up the validation retry
             continue
+        validation_tries += 1
         wall = time.perf_counter() - t0
         pt, ot = r.get("prompt_eval_count", 0), r.get("eval_count", 0)
         att = Attempt(
@@ -133,8 +136,8 @@ def call(
             raw=r["message"]["content"],
         )
         rec.attempts.append(att)
-        if pt + num_predict > NUM_CTX:
-            att.failure, att.error = "context_overflow", f"{pt} prompt + {num_predict} > {NUM_CTX}"
+        if pt + ot >= NUM_CTX:  # the context actually filled up; output may be cut short
+            att.failure, att.error = "context_overflow", f"{pt} prompt + {ot} out >= {NUM_CTX}"
             return rec  # a retry would only make the prompt longer
         try:
             obj = schema.model_validate_json(att.raw)

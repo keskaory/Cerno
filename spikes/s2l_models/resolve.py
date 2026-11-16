@@ -51,11 +51,17 @@ class PreviousMonth(BaseModel):
     kind: Literal["previous_month"]
 
 
+class SameMonthLastYear(BaseModel):
+    kind: Literal["same_month_last_year"]
+
+
 class TranscribeOut(BaseModel):
     intent: Intent
     metric: MetricOut
     comparison: NamedMonth | Relative | Unsupported = Field(discriminator="kind")
-    baseline: PreviousMonth | NamedMonth | Relative | Unsupported = Field(discriminator="kind")
+    baseline: PreviousMonth | SameMonthLastYear | NamedMonth | Relative | Unsupported = Field(
+        discriminator="kind"
+    )
 
 
 MONTHS_RULES = """Return JSON describing the question.
@@ -77,8 +83,9 @@ question states them; never compute dates.
   the question gives one, else null}. "last month" is {"kind": "relative", "months_ago": 1},
   "two months ago" is months_ago 2, "this month" is months_ago 0. Quarters, weeks, years or
   day ranges are {"kind": "unsupported"}.
-- baseline: {"kind": "previous_month"} if the question names no baseline; otherwise the same
-  forms as comparison."""
+- baseline: {"kind": "previous_month"} if the question names no baseline;
+  {"kind": "same_month_last_year"} for "the same month last year"; otherwise the same forms
+  as comparison."""
 
 
 def load() -> dict[str, Any]:
@@ -169,6 +176,8 @@ def resolve(out: MonthsOut | TranscribeOut, ctx: dict[str, Any]) -> dict[str, An
             comp = _resolve_period(out.comparison, latest)
             if isinstance(out.baseline, PreviousMonth):
                 base = shift(comp, 1)
+            elif isinstance(out.baseline, SameMonthLastYear):
+                base = shift(comp, 12)
             elif isinstance(out.baseline, NamedMonth) and out.baseline.year is None:
                 base = most_recent(out.baseline.month, shift(comp, 1))
             else:
@@ -202,7 +211,16 @@ def _resolve_period(p: NamedMonth | Relative, latest: YM) -> YM:
 
 def score(result: dict[str, Any], accept: list[dict[str, Any]]) -> dict[str, bool]:
     correct = any(all(result.get(k) == v for k, v in a.items()) for a in accept)
-    # A substitution answers a different question: an "ok" spec where none was acceptable
-    # (unknown or unspecified metric, unsupported period, off-topic request).
-    substitution = result["status"] == "ok" and not any(a["status"] == "ok" for a in accept)
+    # A substitution answers a different question: a known metric and a concrete period where
+    # none was acceptable. "ok" is one form; so are partial_period and out_of_range when the
+    # question needed a refusal (unknown or unspecified metric, unsupported period, off-topic),
+    # because code only reaches those statuses after accepting a metric and inventing a month.
+    statuses = {a["status"] for a in accept}
+    concrete = {"ok", "partial_period", "out_of_range"}
+    if "ok" in statuses:
+        substitution = False
+    elif statuses & concrete:  # e.g. I02-I04: an "ok" here answers a different month
+        substitution = result["status"] == "ok"
+    else:
+        substitution = result["status"] in concrete
     return {"correct": correct, "substitution": substitution}

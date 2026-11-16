@@ -301,3 +301,149 @@ def test_stats_helpers() -> None:
     assert c.pct([1, 2, 3, 4], 0.5) == 2
     lo, hi = c.wilson(36, 40)
     assert 0.76 < lo < 0.78 and hi > 0.95
+
+
+# --- regressions for the 2026-11-15 review (docs/reviews/2026-11-15-m1-spikes-review.md) ----
+
+
+def test_substitution_counts_invented_out_of_range_or_partial_months() -> None:
+    assert rv.score({"status": "partial_period"}, [{"status": "unsupported_period"}])[
+        "substitution"
+    ]
+    assert rv.score({"status": "out_of_range"}, [{"status": "unknown_metric"}])["substitution"]
+    assert not rv.score({"status": "out_of_range"}, [{"status": "out_of_range"}])["substitution"]
+    assert rv.score({"status": "ok"}, [{"status": "partial_period"}])["substitution"]
+
+
+def test_transcribe_same_month_last_year() -> None:
+    out = rv.TranscribeOut.model_validate(
+        {
+            "intent": "explain_change",
+            "metric": "revenue",
+            "comparison": {"kind": "relative", "months_ago": 1},
+            "baseline": {"kind": "same_month_last_year"},
+        }
+    )
+    r = rv.resolve(out, DATA["contexts"]["A"])
+    assert (r["comparison"], r["baseline"]) == ("2025-10", "2024-10")
+
+
+def _extra(**kw: Any) -> dict[str, Any]:
+    return {"segment": None, "reason": "x", **kw}
+
+
+def test_plan_rejects_out_of_scope_and_hidden_duplicates() -> None:
+    ctx = next(x for x in pl.contexts() if x.name == "shop_aov_v0")  # in scope: region, category
+    plan_m, assess_m = pl.models_for(ctx)
+
+    def plan(extras: list[dict[str, Any]], crosstab: Any = None) -> str | None:
+        out = plan_m.model_validate(
+            {"dimension_order": ctx.in_scope, "crosstab": crosstab, "extras": extras}
+        )
+        return pl.plan_problem(ctx, out)
+
+    channel = _extra(kind="decompose_change", metric="aov", dimension="channel")
+    assert "in-scope" in (plan([channel]) or "")
+    seg_test = _extra(kind="baseline_compare", metric="aov", dimension="region", segment="North")
+    assert "duplicates" in (plan([seg_test]) or "")
+    pair = {"dimension_a": "region", "dimension_b": "category"}
+    flipped = {
+        "kind": "crosstab",
+        "metric": "aov",
+        "dimension_a": "category",
+        "dimension_b": "region",
+        "reason": "x",
+    }
+    assert "crosstab" in (plan([flipped], pair) or "")
+    ok = _extra(kind="decompose_change", metric="aov", dimension="region", segment="North")
+    assert plan([ok]) is None
+    assess = assess_m.model_validate({"action": "add_steps", "reason": "x", "steps": [channel]})
+    assert pl.assess_problem(ctx, assess)
+
+
+def test_verify_rejects_segment_name_in_text() -> None:
+    sc = sy.scenario("a", 0)  # planted North
+    x = ("x", "ev_base_region.rows[segment=North].unexpected_pct", "pct_abs")
+    out = sy.SynthOut(
+        headline=claim("East drove the decline, falling {x}.", x), claims=[claim("ok")]
+    )
+    assert any("label slots" in e for e in sy.verify(out, sc["evidence"]))
+
+
+def test_verify_driver_label_must_be_flagged() -> None:
+    sc = sy.scenario("a", 0)
+    out = sy.SynthOut(
+        headline=claim(
+            "{s} drove the decline, falling {x}.",
+            ("s", "ev_base_region.rows[segment=East].segment", "label"),
+            ("x", "ev_base_region.rows[segment=North].unexpected_pct", "pct_abs"),
+        ),
+        claims=[claim("ok")],
+    )
+    assert any("driver" in e for e in sy.verify(out, sc["evidence"]))
+
+
+def test_verify_direction_per_clause_and_new_words() -> None:
+    sc = sy.scenario("b", 10)
+    ev = sc["evidence"]
+    rows = ev["ev_base_region"]["rows"]
+    up = max(rows, key=lambda r: r["unexpected_pct"])["segment"]
+    dn = min(rows, key=lambda r: r["unexpected_pct"])["segment"]
+
+    def two(a: str, b: str) -> sy.SynthOut:
+        return sy.SynthOut(
+            headline=claim(
+                "{a} fell by {x} while {b} rose by {y}.",
+                ("a", f"ev_base_region.rows[segment={a}].segment", "label"),
+                ("x", f"ev_base_region.rows[segment={a}].unexpected_pct", "pct_abs"),
+                ("b", f"ev_base_region.rows[segment={b}].segment", "label"),
+                ("y", f"ev_base_region.rows[segment={b}].unexpected_pct", "pct_abs"),
+            ),
+            claims=[claim("ok")],
+        )
+
+    assert not [e for e in sy.verify(two(dn, up), ev) if "says" in e]
+    assert [e for e in sy.verify(two(up, dn), ev) if "says" in e]
+    above = sy.SynthOut(
+        headline=claim(
+            "{s} came in {x} above normal.",
+            ("s", f"ev_base_region.rows[segment={dn}].segment", "label"),
+            ("x", f"ev_base_region.rows[segment={dn}].unexpected_pct", "pct_abs"),
+        ),
+        claims=[claim("ok")],
+    )
+    assert [e for e in sy.verify(above, ev) if "says up" in e]
+
+
+def test_verify_format_must_fit_field() -> None:
+    sc = sy.scenario("a", 0)
+    out = sy.SynthOut(
+        headline=claim(
+            "{s} was off by {x}.",
+            ("s", "ev_base_region.rows[segment=North].segment", "label"),
+            ("x", "ev_base_region.rows[segment=North].unexpected_pct", "money_abs"),
+        ),
+        claims=[claim("ok")],
+    )
+    assert any("cannot be shown" in e for e in sy.verify(out, sc["evidence"]))
+
+
+def test_behind_is_not_driver_wording() -> None:
+    assert (
+        sy.driver_claims(
+            sy.SynthOut(
+                headline=claim("Revenue fell behind the level predicted."), claims=[claim("ok")]
+            )
+        )
+        == 0
+    )
+
+
+def test_guided_suppresses_share_when_offsetting() -> None:
+    for seed in range(20, 26):
+        sc = sy.scenario("c", seed)
+        out = sy.guided(sc)
+        refs = [s.ref for cl in [out.headline, *out.claims] for s in cl.slots]
+        if sy.offsetting(sc["evidence"]["ev_dec_region"]):
+            assert not any("share_of_change" in r for r in refs)
+        assert sy.verify(out, sc["evidence"]) == []

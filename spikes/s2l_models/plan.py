@@ -121,33 +121,52 @@ def _playbook_keys(ctx: PlanContext) -> set[tuple[Any, ...]]:
     return keys
 
 
-def _check_steps(ctx: PlanContext, steps: list[Any]) -> str | None:
+def _check_steps(
+    ctx: PlanContext, steps: list[Any], taken_pair: frozenset[str] | None = None
+) -> str | None:
     seen: set[tuple[Any, ...]] = set()
     playbook = _playbook_keys(ctx)
     for s in steps:
         k = _step_key(s)
+        dim = getattr(s, "dimension", None)
+        seg = getattr(s, "segment", None)
         if k in playbook:
-            return f"step {s.kind} on {getattr(s, 'dimension', 'total')} duplicates a playbook step"
+            return f"step {s.kind} on {dim or 'total'} duplicates a playbook step"
+        # The playbook already runs baseline_compare on every segment of in-scope dimensions.
+        if s.kind == "baseline_compare" and s.metric == ctx.metric and dim in ctx.in_scope:
+            return f"baseline_compare on {dim}={seg} duplicates a playbook step"
+        if s.kind == "crosstab":
+            pair = frozenset((s.dimension_a, s.dimension_b))
+            if len(pair) == 1:
+                return "crosstab needs two different dimensions"
+            if pair == taken_pair:
+                return "crosstab duplicates the planned crosstab"
+            k = ("crosstab", s.metric, pair)  # order of the two dimensions doesn't matter
+            dims = list(pair)
+        else:
+            dims = [dim] if dim is not None else []
+        if any(d not in ctx.in_scope for d in dims):
+            return f"steps may only use in-scope dimensions {ctx.in_scope}"
         if k in seen:
             return "duplicate step"
         seen.add(k)
-        seg = getattr(s, "segment", None)
-        dim = getattr(s, "dimension", None)
         if seg is not None and dim is not None and seg not in ctx.dims[dim]:
             return f"segment {seg} does not belong to dimension {dim}"
-        if s.kind == "crosstab" and s.dimension_a == s.dimension_b:
-            return "crosstab needs two different dimensions"
+        if seg is not None and dim is None and not any(seg in ctx.dims[d] for d in ctx.in_scope):
+            return f"segment {seg} is not in an in-scope dimension"
     return None
 
 
 def plan_problem(ctx: PlanContext, out: Any) -> str | None:
     if sorted(out.dimension_order) != sorted(ctx.in_scope):
         return f"dimension_order must be a permutation of {ctx.in_scope}"
+    pair = None
     if out.crosstab is not None:
         a, b = out.crosstab.dimension_a, out.crosstab.dimension_b
         if a == b or a not in ctx.in_scope or b not in ctx.in_scope:
             return "crosstab must pair two different in-scope dimensions"
-    return _check_steps(ctx, out.extras)
+        pair = frozenset((a, b))
+    return _check_steps(ctx, out.extras, pair)
 
 
 def assess_problem(ctx: PlanContext, out: Any) -> str | None:
@@ -163,12 +182,13 @@ runs describe_change on the total, plus baseline_compare and decompose_change on
 in-scope dimension. You may not remove any of that. Return JSON with:
 - dimension_order: all in-scope dimensions, most promising first
 - crosstab: a pair of in-scope dimensions worth crossing, or null
-- extras: up to 3 additional exploratory steps (not duplicates of the playbook), each with a
-  short reason. Use [] if nothing extra is worth checking."""
+- extras: up to 3 additional exploratory steps (not duplicates of the playbook, only
+  in-scope dimensions), each with a short reason. Use [] if nothing extra is worth checking."""
 
 ASSESS_RULES = """You review the evidence so far. Return JSON with action "stop" if the
 evidence is enough, or "add_steps" with up to 3 exploratory steps that would check something
-the playbook did not (not duplicates of the playbook). Give a short reason."""
+the playbook did not (not duplicates of the playbook, only in-scope dimensions). Give a short
+reason."""
 
 
 def plan_prompt(ctx: PlanContext) -> tuple[str, str]:
@@ -194,8 +214,7 @@ def assess_prompt(ctx: PlanContext) -> tuple[str, str]:
             "baseline": ctx.baseline,
             "in_scope_dimensions": ctx.in_scope,
         },
-        "other_dimensions": [d for d in ctx.dims if d not in ctx.in_scope],
-        "segments": ctx.dims,
+        "segments": {d: ctx.dims[d] for d in ctx.in_scope},
         "baseline_compare_results": ctx.evidence,
         "note": "q < 0.05 means beyond normal variation after multiple-testing correction",
     }

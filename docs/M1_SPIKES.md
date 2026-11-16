@@ -78,6 +78,7 @@ Distinct hashes over 50 runs at `threads=4`:
 
 Findings:
 - **Rounding works.** Canonical rounding absorbs the float noise from parallel aggregation. Raw output at 4 threads varies on almost every run, even for DECIMAL sums, where only row order changed.
+- **The canonical hash ignores row order** because it sorts rows. That's right for set identity. Where order matters (top-N), the ORDER BY must be total, which the compiler enforces.
 - **Ties with LIMIT break reproducibility, even within one engine version.** At 4 threads, the ties-plus-LIMIT query returned a different set of rows every time. That confirms the compiler rule that every ORDER BY must be total (ARCH §3.4).
 - **File bytes aren't a stable hash.** Two DuckDB files built from the same Parquet are not byte-identical, so a version's content hash must be computed over the logical data (ARCH §3.1).
 - **Config deviation:** `TimeZone` can't go in `connect(config=...)` when autoload or external access is off. It's set right after connect and then locked (ARCH §4.2).
@@ -164,7 +165,7 @@ Tests: `spikes/s3_repro/test_canon.py`, 8 tests on the canonical hash, all passi
   - **months:** the model writes `YYYY-MM`
   - **transcribe:** the model copies the period, and code resolves it
 
-  The better of the two counts for the gate, and the choice is reported.
+  The better of the two counts for the gate, and the choice is reported. *Clarified after review:* "better" means the schema that passes the RESOLVE gate. If both or neither pass, it's the one with more correct answers, then fewer substitutions.
 - **PLAN:** 10 calls (5 dataset contexts × 2 variants). The schema is a step union whose enums cover metrics, dimensions, step kinds and segments: 16 values in the smallest context and 42 in the two largest.
 - **ASSESS:** 10 calls on the same contexts, with hand-written evidence summaries.
 - **SYNTHESIZE:** S6's 20 reports.
@@ -182,7 +183,7 @@ Tests: `spikes/s3_repro/test_canon.py`, 8 tests on the canonical hash, all passi
 **Pass criteria (per model). All must hold:**
 1. **RESOLVE:**
    - **at least 36 of 40** correct with the better schema (the same 90% bar as the earlier 27/30, set before any run)
-   - **and zero substitutions**: a known metric given for an unknown or unspecified one, or a period invented for an unsupported one
+   - **and zero substitutions**: a known metric given for an unknown or unspecified one, or a period invented for an unsupported one. *v2 counts this whatever the resulting status. An invented month that lands on a partial or out-of-range month is still a substitution.*
 
    The Wilson 95% interval is reported. At n = 40, 36/40 has a lower bound of about 77%.
 2. **Schema:** 10 of 10 PLAN calls and 10 of 10 ASSESS calls end in a schema-valid and semantically valid output, after at most one retry each.
@@ -207,7 +208,7 @@ If **no model passes**, v1 ships Guided mode as the default and Full mode as exp
 
 ## S6 — Claim templates and VERIFY
 
-**Status: FROZEN on 2026-11-15, together with S2L.**
+**Status: FROZEN on 2026-11-15, together with S2L.** v1 was frozen in `1b96f3c`. The independent review found that VERIFY was too lax, so VERIFY v2 (below) replaces it before any results were read (`reviews/2026-11-15-m1-spikes-review.md`). The pass criteria are unchanged.
 
 **Question:** can the model write slot-template claims that pass a deterministic VERIFY, without being pushed into naming drivers on null data? And does Guided mode, with its code-written templates, pass the same VERIFY?
 
@@ -223,10 +224,13 @@ If **no model passes**, v1 ships Guided mode as the default and Full mode as exp
   1. every placeholder has a slot and every slot is used
   2. every reference resolves
   3. no digits in template text
-  4. direction words match the sign of the claim's first change slot
+  4. direction words match the sign: each signed slot is checked against the nearest direction word, so the clauses in "{a} fell while {b} rose" are checked separately; the word lists include above/below
   5. **coverage:** every confirmatory segment with q < 0.05 is referenced
-  6. **driver wording** ("drove", "driver", "driving", "behind the", "responsible for") appears only in a claim that references a segment with q < 0.05, so null reports can't contain any
+  6. **driver wording** ("drove", "driver", "driving", "responsible for", matched as whole words) appears only in a claim whose `label` slots all name segments with q < 0.05, so null reports can't contain any
   7. no URLs, Markdown, "significant" or causal words ("caused", "because", "due to", "led to", "as a result")
+  8. *(v2)* segment names never appear in template text; they come from `label` slots
+  9. *(v2)* each slot's format fits its field (percent fields → pct, money fields → money)
+  10. *(v2)* no `share_of_change` slot from a decomposition whose movements offset (gross/|net| > 3, ARCH §6)
 - **Repair.** At most one: the VERIFY errors go back to the model.
 - **Runs.** 20 reports per model: 7 for (a), 7 for (b), 6 for (c).
 - **Guided mode.** Code templates for each evidence type are rendered and checked by the same VERIFY on the same 20 variants.
