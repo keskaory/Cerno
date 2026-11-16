@@ -9,7 +9,8 @@ Contents:
 2. M0: the tooling, and why each piece exists
 3. S3: making query results reproducible (canonical hashing)
 4. Local LLMs: what runs on your laptop and why the design looks the way it does
-5. Glossary
+5. S7: is the statistics honest? Calibration by simulation
+6. Glossary
 
 ---
 
@@ -196,10 +197,58 @@ Swapping in a different model or vendor touches one class.
 
 ---
 
-## 5. Glossary
+## 5. S7: is the statistics honest? Calibration by simulation
+
+Code: `spikes/s7_calibration/calib.py` (`simulate`, `segments`, `baseline_compare`, `bh`, `by`, `plant_drop`), `run.py` (the frozen suite) and `extended.py` (the follow-up experiments). Results: `spikes/s7_calibration/results/`. Spec: `docs/M1_SPIKES.md` → S7.
+
+### What `baseline_compare` does
+It asks: *is this month's value outside what the segment's own history predicts?*
+1. Take the k ≥ 12 months before the comparison month and fit a straight line `y = a + b·t` by OLS.
+2. Extend the line one step to predict month k.
+3. Its uncertainty is the **prediction standard error**, `SE = s·√(1 + 1/k + (k − t̄)²/Sₜₜ)`. Here `s` is the residual SD of the fit. The `1` is the new month's own noise. The other two terms are the uncertainty in the fitted line, which grows the further you extrapolate.
+4. `t = (observed − predicted) / SE` follows a t-distribution with k − 2 degrees of freedom **if** the residuals are independent, normal and have constant variance. That gives a p-value and a 95% prediction interval.
+
+Run it on the total plus 4 regions and 3 channels and you get 8 p-values. **Benjamini–Hochberg** turns them into q-values that control the false discovery rate. A segment is "beyond normal variation" when q < 0.05.
+
+### Why simulate?
+You can't check calibration on real data, because you never know the truth. So you generate data where you *do* know it:
+- **Null scenarios** plant nothing. Any flag there is a false positive, so the "any driver" rate should be about 5% or less, and the 95% interval should cover the real value about 95% of the time.
+- **Shift scenarios** plant a drop in one region. The share of seeds where that region gets flagged is the **power**.
+
+The generator tries to look like a shop:
+- orders per day are gamma–Poisson, so some days are much busier than Poisson alone would give
+- order values are lognormal
+- there's a weekly cycle, AR(1) day-to-day shocks, and monthly shocks shared across segments
+
+### What S7 found (frozen criteria, levels)
+The formula matches statsmodels to 1e-14, and with flat data the method is calibrated: any-driver 0.040, coverage 0.955. **With growth it breaks:** any-driver 0.107 and coverage 0.925. The reason is **heteroskedasticity**. Business noise is roughly proportional to the level, so in a growing series the newest month is the noisiest. But `s` is estimated from the whole history, which is mostly smaller months, so the interval is too narrow exactly where it's used.
+
+**The fix under investigation: log levels.** On `log(y)`, noise proportional to the level becomes constant, so the constant-variance assumption holds again. A drop of x% becomes a fixed log difference whatever the size. The cost: the interval is no longer symmetric in dollars after you transform back, `log(0)` is undefined (segments with a zero month are already gated out), and linear growth in dollars is slightly curved in logs.
+
+### Power, MDE and why 80% at d = 3 was too much
+**Power** depends on effect size, noise, sample size and α. Here each test has only 11–22 residual degrees of freedom, and BH across 8 tests means a lone flag needs p ≲ 0.05/8 = 0.006. An ideal test at that threshold catches a 3-SD drop only 26% of the time at k = 12 and 41% at k = 23, or 35% averaged over k = 12–23. Even with no correction at all it's 64–75%. You can compute this exactly with the noncentral t-distribution (`analytic_power` in `extended.py`). So the original "80% at d = 3" bar wasn't reachable under the spike's own assumptions. About 5 SDs is what 80% takes. The **minimum detectable effect (MDE)** turns the question around: how big must a drop be to be caught 80% of the time? Reporting the MDE tells you what the tool *can't* see, which matters as much as what it flags.
+
+### Things to remember
+- Calibration is checked under assumptions you chose. Real data can break them in ways the generator doesn't have, such as structural breaks, outliers or new segments. That's why the extended run tries many conditions and reports each one.
+- A conservative test (false positives below α) isn't free. It costs power. With seasonality the method was very conservative (any-driver 0.018), because the seasonal swing inflates `s`.
+
+**Check yourself:**
+1. Why does growth plus noise proportional to the level make the prediction interval too narrow, and not too wide?
+2. Why are the per-segment false-positive rates (about 1%) much lower than the any-driver rate (about 4%)?
+3. BH assumes positive dependence or independence. Why are these 8 tests dependent, and what does BY do differently?
+4. What is the MDE, and why should a report show it next to a "no meaningful change" outcome?
+5. The original S7 failed, and the log-level version passes some of the same criteria. Why doesn't that make the original spike a pass?
+
+---
+
+## 6. Glossary
 
 | Term | Meaning |
 |---|---|
+| **BH / BY** | Benjamini–Hochberg / Benjamini–Yekutieli: ways to adjust many p-values so the expected share of false flags stays ≤ α. BY is valid under any dependence and is more conservative. |
+| **Calibration** | A test is calibrated when its nominal error rates (5% false positives, 95% coverage) match what actually happens |
+| **Heteroskedasticity** | Noise whose size changes with the level or over time |
+| **MDE** | Minimum detectable effect: the smallest true change the test catches with a given power (here 80%) |
 | **Canonical hash** | A hash of a normalized result (sorted rows, rounded floats, typed values) |
 | **Constrained decoding** | Restricting which tokens the model may emit so the output follows a grammar |
 | **Evidence** | A stored query or tool result: SQL, parameters, canonical preview and hash |
