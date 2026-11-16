@@ -254,3 +254,181 @@ If **no model passes**, v1 ships Guided mode as the default and Full mode as exp
 ## S2 — superseded
 
 The original S2, which measured Claude API cost, was replaced by S2L on 2026-11-15 under D9.
+
+---
+
+# M1 results (2026-11-16)
+
+The criteria above are unchanged. Everything below was measured after they were frozen.
+
+## S7 results: FAILED (original criteria)
+
+Run: `spikes/s7_calibration/run.py` → `results/s7.json` (10 s, CPU). It reproduces byte for byte on a re-run, apart from the timing field.
+
+| Criterion | Result (levels, as ARCH §6 specifies) | |
+|---|---|---|
+| 1. any-driver rate ≤ 0.069, `null_flat` / `null_trend` | 0.040 / **0.107** | ✗ |
+| 2. total PI coverage in [0.932, 0.968], flat / trend | 0.955 / **0.925** | ✗ |
+| 3. power ≥ 0.80 at d = 3 | **0.37** | ✗ |
+| 4. non-planted region flag rate ≤ 0.05 | max 0.022 | ✓ |
+| 5. formula = statsmodels within 1e-9 | 7e-15 | ✓ |
+
+Reported only: `seasonal_null` any-driver 0.018; `null_month_ar` (ρ = 0.4) 0.052; BY any-driver 0.018 flat / 0.042 trend.
+
+**S7 stays failed.** The work below investigates a revision. It doesn't change this verdict.
+
+### Investigation: log-level modeling (approved for investigation, not adopted)
+
+**Same scenarios, log scale** (`run.py --log` → `results/s7_log.json`): criteria 1, 2, 4 and 5 pass (trend any-driver 0.051, coverage 0.948). Criterion 3 fails: power 0.49 at d = 3.
+
+**Extended conditions** (`extended.py` → `results/s7_extended.json`, 1,000 null seeds per condition, 300 seeds per power point; random stream separate from the original):
+
+| Condition | Levels FP / coverage | Log FP [Wilson 95%] / coverage | Log passes 1 & 2? |
+|---|---|---|---|
+| flat | 0.039 / 0.955 | 0.040 [0.030, 0.054] / 0.959 | yes |
+| linear growth 1%/mo | 0.067 / 0.930 | 0.051 / 0.941 | yes |
+| linear growth 3%/mo | 0.115 / 0.900 | 0.047 / 0.945 | yes |
+| linear growth 5%/mo | 0.168 / 0.881 | 0.067 / **0.928** | **no** (coverage, borderline: 0.004 under the floor) |
+| linear growth 8%/mo | 0.195 / 0.863 | **0.080** / **0.875** | **no** |
+| compounding 3%/mo | 0.180 / 0.877 | 0.040 / 0.959 | yes |
+| linear decline 3%/mo* | 0.014 / 0.989 | **0.272** / **0.764** | **no** |
+| seasonal ±5 / 10 / 20% | ≤ 0.040 / ≈0.957 | 0.037 / 0.033 / 0.019, coverage ≈0.957 | yes (conservative) |
+| monthly AR(1) ρ = 0.4 / 0.7 | 0.048 / 0.053 | 0.050 / 0.058, coverage 0.941 / 0.933 | yes (0.7 is borderline: 0.001 above the floor) |
+| shocks ×2 | 0.048 / 0.944 | 0.041 / 0.944 | yes |
+| heavy-tailed shocks (t₃) | 0.052 / 0.957 | 0.054 / 0.956 | yes |
+| overdispersion (NB shape 1) | 0.048 / 0.955 | 0.046 / 0.958 | yes |
+| 40 / 8 orders per day | 0.061 / 0.045 | 0.062 / 0.056 | yes |
+| 3 orders per day (63% of segments gated out) | 0.039 / 0.950 | 0.046 / 0.954 | yes |
+| new region launches mid-history (zeros before) | 0.043 / 0.967 | 0.036 / **0.974** [0.962, 0.982] | **no** (too wide: conservative) |
+
+**Totals: log levels pass criteria 1 and 2 in 15 of 19 conditions; levels pass in 12.** The 4 log failures are listed above, and two passes (AR 0.7, and growth 5% on false positives) sit right at a threshold.
+
+\* Cells decline 1.5–4.5% of their *starting* level per month. A decline that's linear in dollars is strongly concave in logs: at 3% and month 20, the drop is about 7.5% of the *current* level per month and still speeding up. The straight log-line can't follow it. The 5% floor clip touches the final month in only about 12% of seeds, so it isn't the cause. A compounding decline wasn't tested; that's the shape log modeling handles, as `compound_3pct` shows for growth.
+
+**Why the launch case is conservative:** the launch is a step inside the history of the total and every channel. That inflates the residual SD, which widens the interval (coverage up) and costs power on those segments.
+
+**What this says:**
+- Log levels fix the heteroskedasticity failure for moderate and compounding growth, and they don't break under seasonality, autocorrelation, heavy tails, overdispersion or small segments.
+- They fail when the trend is strongly curved on the log scale: steep linear growth or decline.
+- Zero-valued segments are handled by the existing gates (zero in any prior period → `not_estimable`). A segment that appears mid-history is gated out, and the totals stay calibrated (conservative).
+
+### Power and minimum detectable effect
+
+Power is the share of seeds where the planted region is flagged with q < 0.05 in the planted direction. d is in units of the region's in-sample level residual SD, which is about 7% of the region's revenue.
+
+| Condition | MDE80 as a % drop of the region's month (log) | MDE80 in flat-condition SDs (log / levels) |
+|---|---|---|
+| flat | **28%** | 4.1 / 4.6 |
+| growth 3%/mo | **27%** | 5.9 / 5.7 |
+| seasonal ±10% | **38%** | 5.9 / 6.8 |
+| monthly AR(1) 0.4 | **28%** | 3.9 / 4.4 |
+| heavy tails t₃ | **27%** | 4.0 / 4.5 |
+
+The % column is the one to read. The SD units are the *flat* condition's residual SD for every row. So with growth, where the final level is larger, "SDs" overstates the effect needed; in % terms, growth costs nothing. Seasonality is a real loss, because the seasonal swing inflates the residual SD.
+
+Power at d = 1, 2, 3, 4, 5, 6, 8 (flat, log): 0.04, 0.16, 0.43, 0.79, 0.95, 0.99, 1.00. Non-planted regions were flagged at ≤ 3.4% in every power run.
+
+### Was "80% power at d = 3" realistic?
+
+**No, not under the spike's own assumptions.** Take an ideal test: correct model, iid normal residuals, known df, Bonferroni α/8 (what BH asks of a lone discovery among 8 tests). Its power is set by the noncentral t-distribution (`extended.analytic_power`):
+
+| k (prior months) | d = 3, no correction | d = 3, α/8 |
+|---|---|---|
+| 12 | 0.64 | 0.26 |
+| 18 | 0.72 | 0.36 |
+| 23 | 0.75 | 0.41 |
+| average over 12–23 | — | 0.35 |
+
+**The clearest proof is the uncorrected column:** even one test with no multiplicity correction reaches only 0.64–0.75 at d = 3. So 0.80 is out of reach before BH is even applied. At α/8, 80% needs between d = 4 (0.65 average) and d = 5 (0.87 average); BH power sits between those two bounds. The measured log-level power at d = 3 (0.43 extended, 0.49 in the frozen `s7_log.json` run) is *above* the ideal lone-test figure, because BH gains a little when the channel and total also move. The method isn't wasting power. The bar asked for more than 12–23 monthly points and 8 tests can give.
+
+### Proposed revised criterion (needs your approval; not applied)
+
+Replace criterion 3 with two parts, both stated before any new run:
+- **3a, efficiency (gated).** In `null_flat`-shaped data, empirical power at d = 2, 3, 4, 5 is at least the ideal-test power at α/8 for the same k mix, minus 0.05. That's a lower bound the method must not fall below.
+- **3b, MDE disclosure (gated as a product rule, not a number).** Every `baseline_compare` result reports its MDE at 80% power. A "no meaningful change" outcome shows the smallest change that could have been detected.
+
+On the extended data, 3a would pass (0.16 / 0.43 / 0.79 / 0.95 against 0.12 / 0.35 / 0.65 / 0.87). That's stated for transparency. The criterion should be checked on a fresh run with a new seed stream if you approve it.
+
+## S2L v2 results: NO MODEL PASSES
+
+Harness v2 (`5850571`); `run.py` hash `ac2aa3e6` recorded in every results file. Ollama 0.40.16, NVIDIA driver 617.14, all models Q4_K_M, `remote_host` null, temperature 0, seed 1, num_ctx 8192, think off (qwen3 also run with think on, below). num_predict: RESOLVE 256, PLAN 768, ASSESS 768, SYNTH 1536. Results: `spikes/s2l_models/results/`. Run time: 20 min (4b), 139 min (qwen3:8b), 118 min (12b).
+
+### Gate results
+
+| Criterion | gemma3:4b (`68ceab7e`) | qwen3:8b (`500a1f06`) | gemma3:12b (`b92b2185`) |
+|---|---|---|---|
+| 1. RESOLVE ≥ 36/40, 0 substitutions | ✗ 1/40 (months) | ✗ 22/40, 1 subst. (transcribe) | ✗ 2/40 (transcribe) |
+| 2. PLAN 10/10 and ASSESS 10/10 | ✗ 0/10, 10/10 | ✗ 7/10, 9/10 | ✗ 8/10, 6/10 |
+| 3. latency p50 ≤ 180 s, p90 ≤ 300 s | ✓ 71 / 90 s | ✓ 178 / 255 s | ✗ 444 / 568 s |
+| 4. S6 | ✗ 0/20 completed | ✗ 0/20 | ✗ 8/20 |
+| Guided mode VERIFY | 20/20 | 20/20 | 20/20 |
+
+Per the pre-registered rule, **v1 ships Guided mode as the default and Full mode as experimental** (ARCH §5.5).
+
+### Measured separately
+
+**Structured output.** With thinking off, all 420 calls across the three models parsed as JSON and passed schema validation on the first try, in every stage. Constrained decoding does what it promises. Every failure was semantic. With qwen3's thinking on, 16 of 30 first attempts failed to parse, because the reasoning text used up the output budget (`truncated`).
+
+**Semantic correctness.**
+
+| | 4b | qwen3:8b | 12b |
+|---|---|---|---|
+| RESOLVE months / transcribe | 1 / 1 | 21 / 22 | 1 / 2 |
+| `intent: "other"` given (of 40), months / transcribe | 39 / 40 | 18 / 16 | 40 / 39 |
+| PLAN semantic retries; final valid | 10; 0 | 3; 7 | 7; 8 |
+| ASSESS semantic retries; final valid | 7; 10 | 1; 9 | 4; 6 |
+| S6: completed / repaired / planted covered | 0 / 0 / – | 0 / 0 / – | 8 / 8 / 5 of 5 |
+| S6: null driver claims before → after VERIFY | 5 → 0 | 0 → 0 | 0 → 0 |
+| S6: drafts with digits before VERIFY | 20 | 20 | 13 |
+
+Most frequent first-draft VERIFY errors: segment names written in template text (4b: 91, 12b: 30, qwen3: 10), digits in text (34 / 27 / 17), a slot format that doesn't fit its field (e.g. `delta` as `number`), stray braces, and for qwen3, causal words (13) and "significant" (12).
+
+**Latency** (p50 per call; decode speed):
+
+| Stage | 4b | qwen3:8b | 12b |
+|---|---|---|---|
+| RESOLVE | 3.2 s | 7.0 s | 10.1 s |
+| PLAN | 14.1 s | 14.8 s | 78.8 s |
+| ASSESS | 11.4 s | 6.7 s | 41.1 s |
+| SYNTH | 16.9 s | 74.7 s | 141.2 s |
+| decode tok/s | 48–54 | 12–16 | 6–8 |
+
+The latency projection includes the measured S6 repair rate, which was 1.0 for all three models. With no repairs, 12b would still project about 302 s at p50.
+
+**Memory** (num_ctx 8192):
+
+| | 4b | qwen3:8b | 12b |
+|---|---|---|---|
+| model size | 2.9 GB | 6.6 GB | 9.0 GB |
+| share in VRAM | 100% | 64% | 35% |
+| GPU memory in use | 4.4 GB | 4.7 GB | 4.7 GB |
+| cold load | 7.5 s | 9.8 s | 21.3 s |
+| free system RAM during run | ~0.8 GB | ~0.8 GB | ~0.6–1.0 GB |
+
+Free RAM stayed under about 1 GB of 15 GB while the larger models ran, so the system was close to swapping. The "before" RAM readings are unreliable, because the previous model may still have been unloading.
+
+**Failures by class (thinking off):** no `transport`, `invalid_json`, `schema_violation`, `context_overflow` or `truncated` failures in any stage. All failures were `semantic_error` (RESOLVE retries, PLAN/ASSESS checks) or VERIFY rejections in S6. With thinking on (qwen3): 21 `truncated` (PLAN 7, ASSESS 3, SYNTH 11) and 8 `semantic_error`.
+
+**qwen3:8b with thinking on:** PLAN 4/10, ASSESS 8/10, S6 0/6. p50 per call was 98 s for PLAN and 277 s for SYNTH. Thinking made it slower and no better.
+
+### Harness defects found after the run (v2 stays the official result)
+
+Reading the raw outputs, I found two defects in my own harness that penalize the models unfairly. **The v2 scores above are unchanged and remain the result.**
+
+1. **The RESOLVE prompt never names `"explain_change"`.** The rule text says when to write `"other"` but never what to write otherwise; that value appears only in the decoding grammar. The Gemma models answered `"other"` while getting the metric and months right. Example: C01 in 12b's raw output is `revenue`, October 2025 vs September 2025, with `intent: "other"`.
+   - *Diagnostic re-score, ignoring the `intent` field (not a pass):* 12b transcribe 36/40 with 0 substitutions; qwen3:8b transcribe 35/40 with 2 substitutions; 4b months 25/40 with 3.
+   - Ignoring intent also removes the only way to answer I01 ("write a poem"), which is counted wrong. That's the conservative choice, since gemma3:12b gave `"other"` on 39 of 40 questions, so its intent field carried no information.
+   - **12b's 36 sits exactly on the threshold and is post hoc. It isn't a pass.**
+   - qwen3:8b used `intent` deliberately: it marked 16 refusal-type questions `"other"`. Forcing intent overrides that and *creates* one of its two substitutions (P02). Its own substitution is P03, where "2025 vs 2024" became Dec vs Dec. qwen fails either way.
+   - Y03 ("between December 2025 and January 2026") is ambiguous. Both strong models read December as the comparison month. It stays in the frozen set, but a v3 question set should avoid that phrasing.
+2. **The SYNTH evidence has no reference for the period label.** The question says "October 2025 compared with September 2025", but no slot can render a month. So a template that names the month must contain digits, which VERIFY rejects. Almost every first-try digit violation, for all three models, was "October/September 2025".
+   - The independent reviewer re-verified with the period label stripped. gemma3:12b completes 6/20 on the first try (8–10 after repair), and qwen3:8b 3/20 (5–6). S6 needs 18, so **S6 still fails for every model** after this correction.
+3. **The SYNTH prompt offers a `number` format that VERIFY accepts for no field** (found by the reviewer). The evidence also doesn't say that AOV's `rate_effect`/`mix_effect`/`total_effect` are dollars, so models reasonably chose `number` and were rejected. Relaxing this adds 1–2 completed reports. It doesn't change the verdict.
+
+**A VERIFY gap that's too lenient:** the "significant" check is a substring of the rule's own word list and misses "significance". gemma3:12b's "statistical significance of {q}" passed. It didn't affect any outcome, but v3 must close it. The other rejections the reviewer sampled were genuine breaches of rules stated in the prompt.
+
+None of these defects affects the latency verdict for gemma3:12b (302 s at p50 even with zero repairs). They did make every model's repair rate 1.0, so the latency *passes* of gemma3:4b (71 s) and qwen3:8b (178 s) are pessimistic, not optimistic.
+
+### What would be needed to re-test (needs your approval)
+
+A v3 harness that fixes only these three defects and the gap (name `explain_change` in the rule text; add a period-label evidence field; drop `number` or label each field's unit; match `signific*`), plus **a new, held-out set of 40 questions written and frozen before any run**. The current 40 have now shaped a fix, so re-using them would overstate accuracy. Thresholds unchanged. Expected cost: about 4.5 hours of local compute, $0. Even if v3 passed on quality, only qwen3:8b is near the latency bar, at 178 s p50 with a repair rate of 1.0.

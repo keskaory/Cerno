@@ -5,7 +5,7 @@ Status: **v2.0 draft** (2026-11-15). v1.1 came from the architecture review. v2.
 | # | Risk | L | I | State |
 |---|---|---|---|---|
 | R1 | Queries run fine but answer the wrong question (wrong join, grain, filter or period) | Med | High | assumed mitigated |
-| R2 | Statistical conclusions are overstated | Med | High | assumed mitigated |
+| R2 | Statistical conclusions are overstated | **High** | High | **S7 failed** (2026-11-16); log-level revision investigated, not adopted |
 | R3 | Untrusted SQL or files escape the sandbox, steal secrets or exhaust resources | Low | High | assumed mitigated |
 | R4 | ~~API spend runs away~~ (retired by D9: no paid APIs). Replaced by R14. | — | — | retired |
 | R5 | Reports are wrong but look verified (hallucination, injection steering) | Med | High | assumed mitigated |
@@ -16,11 +16,12 @@ Status: **v2.0 draft** (2026-11-15). v1.1 came from the architecture review. v2.
 | R10 | Scope is too big for the time available | High | High | partly mitigated; timeline unknown |
 | R11 | Results aren't reproducible (hash flakes) | Med | Med | unvalidated |
 | R12 | Windows dev vs. Linux prod differences waste days | Med | Low | decision pending (D5) |
-| R13 | The structured-output schema is too large or slow for typed steps with dynamic enums | Med | Med | unvalidated (S2L) |
-| R14 | No local model that fits 6 GB of VRAM is good enough for PLAN and SYNTHESIZE | Med | High | partly measured (probe); S2L |
-| R15 | Local inference is too slow for a good live demo or an affordable-in-time benchmark | Med | Med | partly measured (probe); S2L |
-| R16 | Grammar-constrained output parses, but its content is wrong (ignored schema keywords, plausible but wrong enums) | High | Med | observed in probe; mitigated by design |
+| R13 | The structured-output schema is too large or slow for typed steps with dynamic enums | Low | Med | **measured** (S2L): schemas up to 42 enum values parsed 100% with thinking off |
+| R14 | No local model that fits 6 GB of VRAM is good enough for PLAN and SYNTHESIZE | **High** | High | **occurred** (S2L v2: no model passes); Guided mode is the default |
+| R15 | Local inference is too slow for a good live demo or an affordable-in-time benchmark | High | Med | **measured**: only gemma3:4b and qwen3:8b fit 180 s; 12b projects 444 s |
+| R16 | Grammar-constrained output parses, but its content is wrong (ignored schema keywords, plausible but wrong enums) | High | Med | **confirmed** (S2L): 420/420 parsed, every failure semantic |
 | R17 | Results depend on one machine's hardware and drivers, so others can't reproduce them | Med | Med | assumed mitigated |
+| R18 | Our own benchmark harness mis-measures (prompt or VERIFY defects), so scores reflect the harness, not the model | **High** | High | **occurred twice** in M1 (see below) |
 
 ### R1 — Logically wrong SQL
 - **Why it matters:** a wrong number looks exactly like a right one.
@@ -32,6 +33,7 @@ Status: **v2.0 draft** (2026-11-15). v1.1 came from the architecture review. v2.
 - **Mitigation:** period changes (for the total and for each segment) are judged by a one-step-ahead prediction interval from a linear trend fitted to k ≥ 12 prior months, instead of by row-level tests. BH/BY correction is applied across every p-value in the investigation. Steps added mid-run are labeled exploratory. Strength labels are computed by code. Group comparisons at the customer level are deferred until they can be calibrated.
 - **Validation:** the calibration suite (about 200 seeds per PR, ≥ 1,000 nightly). This turns "assumed" into "validated" on our data generator, though not on real data.
 - **What's left:** with 12–23 points the intervals are wide. Annual seasonality and curved growth break the linear-trend assumption. Calibration measures that failure on a seasonal scenario but doesn't fix it.
+- **S7 result (2026-11-16): failed.** In levels, false positives with growth were 0.107 and coverage 0.925, because noise scales with the level. Log levels fix this in 15 of 19 tested conditions, including moderate and compounding growth, but fail for steep linear growth (5–8%/mo) or linear decline, where the series curves on the log scale. Power at d = 3 is 0.37 (levels) or 0.49 (log) against 0.80, a bar an ideal test can't reach with 12–23 monthly points and 8 tests (ideal ≈0.35). The MDE for 80% power is about 4 residual SDs, about a 28% drop in a region. See `M1_SPIKES.md` → M1 results.
 - **Fallback:** if a tool can't pass calibration, it returns descriptive output only.
 
 ### R3 — Sandbox escape
@@ -116,6 +118,19 @@ Published eval numbers come from one GPU. **Mitigation:**
 - re-run agreement is measured
 - `evals/run.py --model` lets anyone re-run the suite
 - the README says which machine produced the numbers
+
+### R18 — Harness validity (new, 2026-11-16)
+It happened twice in M1:
+- **Before running:** an independent review found v1 scoring too lax. v1 was stopped and replaced by v2 before any output was read.
+- **After running:** the v2 RESOLVE prompt never named `"explain_change"`, the SYNTH evidence had no slot for the period label, and the SYNTH prompt offered a `number` format that VERIFY never accepts. All three pushed scores down. One VERIFY gap ("significance") was too lenient.
+
+**Mitigation:**
+- an independent review of the harness *before* each run
+- a smoke run of 3–5 items per stage on one model, whose outputs are read by hand before the full run (it scores nothing, so it can't bias thresholds)
+- a held-out question set for any harness revision written after seeing results
+- every prompt names every enum value it expects
+
+**What's left:** a harness can still be wrong in ways nobody thought to check. Raw outputs are kept (`spikes/*/out/`, gitignored) so the scoring can always be audited.
 
 ## Spikes
 

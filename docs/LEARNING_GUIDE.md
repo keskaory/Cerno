@@ -190,10 +190,26 @@ Every LLM call goes through one small protocol, `LLMProvider.generate(request) -
 
 Swapping in a different model or vendor touches one class.
 
+### What S2L found, and how to read a benchmark honestly
+Code: `spikes/s2l_models/` (`resolve.py`, `plan.py`, `synth.py`, `client.py`, `run.py`). Results: `docs/M1_SPIKES.md` → M1 results.
+
+**The procedure matters as much as the numbers:**
+1. The questions and pass/fail criteria were **frozen before any run**, with file hashes in the journal, so nobody could tune them to the results.
+2. An independent review then found the v1 scoring too lax. v1 was stopped *before any output was read* and replaced by v2.
+3. v2 ran on all three models: **no model passed.** gemma3:4b and qwen3:8b were fast enough but wrong too often. gemma3:12b was the most accurate where it counted, but too slow on this laptop (about 444 s per investigation against a 180 s limit), because 65% of it runs on the CPU.
+4. Reading the raw outputs showed **two defects in our own harness**: the RESOLVE prompt never named the value `"explain_change"`, and SYNTH had no way to put a month name in a slot. The v2 scores stay the official result anyway. Changing the prompt after seeing the results and re-running the same questions would be fitting the test to the answers, so a fixed v3 needs a fresh, held-out question set.
+
+**What held up:**
+- **Structured output is solved.** With thinking off, all 420 calls parsed and passed the schema on the first try, including schemas with 42 enum values. Every failure was *semantic*: valid JSON with wrong content. This is R16, confirmed.
+- **Guided mode passed VERIFY 20/20.** It's the default for v1, as the pre-registered rule says when no model passes.
+- **"Thinking" made qwen3 slower and no better.** Its reasoning text used up the output budget, and 21 calls were cut off.
+
 **Check yourself:**
 1. Why does valid JSON from constrained decoding still need Pydantic validation?
 2. Give two reasons the model transcribes periods instead of computing dates.
 3. What breaks if a test suite calls the real model instead of `ScriptedProvider`?
+4. The diagnostic re-score (ignoring `intent`) puts gemma3:12b at 36/40. Why isn't that a pass, and what would a fair re-test need?
+5. Why was it right to stop the v1 run before reading its outputs, but wrong to fix the prompt and re-run the same 40 questions after reading v2's?
 
 ---
 

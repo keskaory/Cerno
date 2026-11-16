@@ -216,3 +216,26 @@ Why:
 - **Reported only:** with seasonality (±10%) the method is *conservative* (any-driver 0.018), because the sine wave inflates the residual SD. With AR(1) monthly shocks at ρ = 0.4, any-driver is 0.052 in levels and 0.044 in logs, inside the band but closer to it.
 
 I haven't changed the method or the bar. Both are your call at the checkpoint: switching `baseline_compare` to log levels (an ARCH §6 change), and either accepting a lower power bar or reporting the MDE honestly.
+
+## 2026-11-16: M1 results. S2L: no model passes. S7 fails; log levels investigated
+
+**S2L v2 ran on all three models** (frozen harness `5850571`, run.py hash `ac2aa3e6` in every results file). No model passes.
+- gemma3:4b and qwen3:8b are fast enough (projected 71 s and 178 s) but wrong too often.
+- gemma3:12b fails latency (444 s), with 65% of the model on the CPU.
+- By the pre-registered rule, **Guided mode is the v1 default**, with Full mode experimental. Guided passed VERIFY 20/20.
+
+Reading the raw outputs, I found that **my harness was partly to blame**:
+- The RESOLVE rule text never names `"explain_change"`. The Gemma models put the right metric and months next to `intent: "other"`.
+- SYNTH had no slot for the period label, so naming "October 2025" broke the no-digits rule.
+- The reviewer found a third: a `number` format that VERIFY never accepts.
+
+I kept the v2 scores as the result. A diagnostic re-score puts gemma3:12b at exactly 36/40 on RESOLVE, but that's post hoc and on the bar. S6 still fails for every model once the period-label defect is removed. Lesson: freezing protects against tuning, but it doesn't protect against a broken instrument. A hand-read smoke run before the full run would have caught all three (R18).
+
+**S7 extended** (`extended.py`, 19 conditions; the original S7 re-run is byte-identical):
+- Log levels pass the calibration criteria in 15/19 conditions.
+- They fail with steep linear growth or decline (the series curves in log space). A mid-history launch is conservative.
+- The MDE for 80% power is about 28% of a region's month, or 38% with ±10% seasonality.
+- The original 80%-at-3-SD bar was unreachable: one uncorrected ideal test gets only 0.64–0.75.
+- I proposed a replacement criterion (efficiency against the ideal test, plus MDE disclosure) for approval. It isn't applied.
+
+Second independent review: `reviews/2026-11-16-m1-results-review.md`. It corrected my pass count (13 → 15) and showed the "6 SDs with growth" was a units artifact. No verdict changed.
