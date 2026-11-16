@@ -121,82 +121,131 @@ Tests: `spikes/s3_repro/test_canon.py`, 8 tests on the canonical hash, all passi
 
 ## S2L — Local model selection (replaces S2)
 
+**Status: FROZEN on 2026-11-15, before any S2L call.** The question set, expected answers, scoring code and these criteria are committed together. Their SHA-256 hashes are in the journal. After the freeze, a harness bug may be fixed only if it's documented with the commit that fixed it. Thresholds, questions and expected answers don't change. If a model fails, the failure is reported and a way forward recommended (your requirement 9).
+
 **Question:** which free local model, if any, runs well enough on the dev machine to drive RESOLVE, PLAN, ASSESS and SYNTHESIZE?
 
 **Dev machine:**
-- RTX 4050 Laptop, 6 GB VRAM
+- RTX 4050 Laptop, 6 GB VRAM, NVIDIA driver 617.14
 - 15 GB RAM
 - Ryzen 7 7445HS
+- Windows 11 build 26200
 - Ollama 0.40.16
 
-**Candidates:**
-- Already installed: `gemma3:4b`, `gemma3:12b`, `qwen3:8b`.
-- Other models get added only with your OK to download them.
-- Each model is pinned by digest.
-- Thinking is off unless stated. For Qwen3, thinking-on is measured separately on PLAN and SYNTHESIZE.
+**Candidates.** All three stay in until S2L decides: `gemma3:4b`, `qwen3:8b` and `gemma3:12b`. Each is pinned by digest. No other model is downloaded without your OK.
 
-**Setup:**
-- 30 **newly written** RESOLVE questions. The 12 probe questions shaped the schema, so they're excluded.
-  - At least 8 are `unknown_metric` cases.
-  - At least 4 use periods the schema should mark `unsupported`.
-  - Both the transcribe and months schemas are scored, and the better one per model counts.
-  - The questions, the expected answers and these criteria are **committed, with their SHA-256 in the journal, before any S2L call runs**.
-  - You're invited to write some of the questions, so the schema designer isn't the only author (review M1).
-- The PLAN step-union schema with about 30 enum values, on 5 hand-written dataset contexts.
-- ASSESS on the same contexts with hand-written evidence.
-- SYNTHESIZE comes from S6.
-- `temperature=0` with a fixed seed. Every call goes through Pydantic validation, with at most one retry.
+**Inference settings (identical for every model and stage):**
+- `temperature=0`, `seed=1`, `num_ctx=8192`, `keep_alive=30m`
+- `think=false`. For Qwen3, thinking-on is measured separately on PLAN and SYNTHESIZE, and is recorded only.
+- `num_predict`: RESOLVE 256, PLAN 768, ASSESS 768, SYNTHESIZE 1536
+- `format` = the stage's JSON schema
+- one retry on a validation failure, with the error appended
 
-**Pass criteria (per model):**
+**Setup** (`spikes/s2l_models/`):
+- **RESOLVE:** 40 newly written questions (`questions.json`) over 3 dataset contexts:
+  - context A ends on a complete month
+  - context B ends right after a **year transition**
+  - context C ends **mid-month**, so its current month is partial
+
+  The 12 probe questions shaped the schema, so they're excluded.
+
+  | Category | n | What it tests |
+  |---|---|---|
+  | clear | 5 | explicit metric and months |
+  | relative | 5 | "last month", "two months ago", "same month last year" |
+  | date boundary | 5 | months with no year, the month right after the data ends, partial months |
+  | year transition | 5 | December/January questions in context B |
+  | ambiguous | 4 | "sales", "basket size", no metric at all |
+  | unknown metric | 8 | metrics the dataset doesn't define |
+  | unsupported period | 4 | quarters, weeks, years, "last 90 days" |
+  | invalid / out of range / partial | 4 | off-topic requests, months outside the data, the current partial month |
+
+  Each question lists every answer that's acceptable. Code turns the model's output into one status: `ok` with metric, comparison month and baseline month; `unknown_metric`; `needs_metric`; `unsupported_period`; `out_of_range`; `partial_period`; or `invalid`. Two output schemas are scored for each model:
+  - **months:** the model writes `YYYY-MM`
+  - **transcribe:** the model copies the period, and code resolves it
+
+  The better of the two counts for the gate, and the choice is reported.
+- **PLAN:** 10 calls (5 dataset contexts × 2 variants). The schema is a step union whose enums cover metrics, dimensions, step kinds and segments: 16 values in the smallest context and 42 in the two largest.
+- **ASSESS:** 10 calls on the same contexts, with hand-written evidence summaries.
+- **SYNTHESIZE:** S6's 20 reports.
+
+**What's measured. Each is reported separately (your requirement 3):**
+
+| Dimension | Measures |
+|---|---|
+| Structured output | Share of calls that parse as JSON; share that pass schema validation, first try and after the retry |
+| Semantic correctness | RESOLVE status and months against the accepted answers; PLAN and ASSESS semantic validity (only in-scope dimensions, a permutation, no duplicate playbook steps); S6 VERIFY results |
+| Latency | Per-call wall time, prompt-processing and decode tokens/s, p50 and p90 per stage, cold-load time |
+| Memory | Model size, share in VRAM at `num_ctx=8192`, GPU memory used, free system RAM before and after loading |
+| Failures | Each failure classified as `transport`, `invalid_json`, `schema_violation`, `semantic_error`, `context_overflow` or `truncated` |
+
+**Pass criteria (per model). All must hold:**
 1. **RESOLVE:**
-   - at least 27 of 30 exactly right on metric and windows (after code resolution), or correctly reported as `unknown_metric` or `unsupported`
-   - **and zero metric substitutions**, i.e. an unknown metric answered as a known one, which is the worst failure because it answers a different question
+   - **at least 36 of 40** correct with the better schema (the same 90% bar as the earlier 27/30, set before any run)
+   - **and zero substitutions**: a known metric given for an unknown or unspecified one, or a period invented for an unsupported one
 
-   The Wilson 95% interval is reported with the score. At n = 30, 27/30 has a lower bound of about 74%, so this gate catches a bad model; it doesn't certify a good one.
-2. **Schema:** 10 of 10 PLAN calls produce a valid step list, allowing at most one retry each. ASSESS is held to the same bar. (PLAN can't prune the confirmatory playbook, ARCH §5.1, so its quality affects exploratory extras and ordering, not recall. The share of proposed extras that are sensible is recorded.)
-3. **Latency (replaces cost).** Projected LLM time per investigation must come in at p50 ≤ 180 s and p90 ≤ 300 s.
-   - Projection: PLAN + 2 × ASSESS + SYNTHESIZE + (S6 repair rate × SYNTHESIZE) + (measured retry rate × each stage).
-   - It's measured with the model already loaded, with **realistic prompt sizes** (the evidence ledger included) and one fixed `num_ctx` large enough for the biggest prompt. Cold-load time is reported separately.
+   The Wilson 95% interval is reported. At n = 40, 36/40 has a lower bound of about 77%.
+2. **Schema:** 10 of 10 PLAN calls and 10 of 10 ASSESS calls end in a schema-valid and semantically valid output, after at most one retry each.
+3. **Latency.** Projected LLM time per investigation at **p50 ≤ 180 s and p90 ≤ 300 s**, with the model loaded and `num_ctx=8192`.
+   - Projection: PLAN + 2 × ASSESS + SYNTHESIZE × (1 + S6 repair rate), with each stage's time already including its measured retries.
+   - p50 uses each stage's p50, and p90 uses each stage's p90, which is conservative.
 4. **S6 passes** on the same model.
 
 **Selection** among the models that pass, in strict order:
 1. more S6 reports `completed`
 2. more RESOLVE answers correct
 3. lower projected p50 latency
-4. an Apache-2.0 license over custom terms **If no model passes**, v1 ships Guided mode as the default and Full mode as experimental (ARCH §5.5), and the README says why.
+4. an Apache-2.0 license over custom terms
+
+If **no model passes**, v1 ships Guided mode as the default and Full mode as experimental (ARCH §5.5). The checkpoint reports why and recommends what to try next.
 
 **Also recorded:**
-- the share of the model held in VRAM, decode tokens per second, prompt-processing speed and cold-load time, at the chosen `num_ctx`
-- the model digest, quantization, Ollama version and NVIDIA driver version
+- the model digest, quantization, Ollama version, driver version and every inference setting, in each results file
 - tokens in and out per stage
-- the cost of thinking-on, in time and in quality
-- text-to-SQL execution accuracy on 20 questions. This only matters for the M7 ReAct baseline, so it's reported but not gated.
+- thinking-on time and quality for Qwen3
+- text-to-SQL accuracy. It's reported from the probe only, because it matters only for the M7 ReAct baseline.
 
 ## S6 — Claim templates and VERIFY
 
-**Question:** can the model write slot-template claims that pass a deterministic VERIFY, without being pushed into naming drivers on null data?
+**Status: FROZEN on 2026-11-15, together with S2L.**
 
-**Setup:**
-- Hand-written evidence JSON for 3 scenarios:
-  - (a) a single regional driver, with q < 0.05
-  - (b) offsetting movements plus an AOV mix shift
+**Question:** can the model write slot-template claims that pass a deterministic VERIFY, without being pushed into naming drivers on null data? And does Guided mode, with its code-written templates, pass the same VERIFY?
+
+**Setup** (`spikes/s2l_models/synth.py`):
+- **Evidence.** Generated, seeded evidence JSON for 3 scenarios. Each report gets a different variant, with a different planted region and different numbers, so the 20 prompts aren't identical:
+  - (a) a single regional driver, with confirmatory q < 0.05
+  - (b) offsetting regional movements, two with q < 0.05 in opposite directions, on the ratio metric AOV, with a rate/mix decomposition
   - (c) null: no q < 0.05
-- A minimal slot renderer and VERIFY that follow ARCHITECTURE §7. Only one repair attempt is allowed.
-- SYNTHESIZE runs on each S2L candidate through Ollama, with schema-constrained output and Pydantic validation.
-- 20 reports: 7 for (a), 7 for (b), 6 for (c).
+- **Who writes what:**
+  - **Code** writes the outcome sentence, because the outcome label is computed by code (ARCH §5.4).
+  - **The model** writes a headline template and up to 6 claim templates. Each slot names an evidence reference and a format.
+- **VERIFY** (deterministic) checks:
+  1. every placeholder has a slot and every slot is used
+  2. every reference resolves
+  3. no digits in template text
+  4. direction words match the sign of the claim's first change slot
+  5. **coverage:** every confirmatory segment with q < 0.05 is referenced
+  6. **driver wording** ("drove", "driver", "driving", "behind the", "responsible for") appears only in a claim that references a segment with q < 0.05, so null reports can't contain any
+  7. no URLs, Markdown, "significant" or causal words ("caused", "because", "due to", "led to", "as a result")
+- **Repair.** At most one: the VERIFY errors go back to the model.
+- **Runs.** 20 reports per model: 7 for (a), 7 for (b), 6 for (c).
+- **Guided mode.** Code templates for each evidence type are rendered and checked by the same VERIFY on the same 20 variants.
 
-**Pass criteria:**
+**Pass criteria (per model):**
 1. At least 18 of 20 reports reach `completed`, meaning VERIFY passes with at most one repair.
-2. The null reports contain zero driver claims.
+2. The null reports contain **zero driver claims** after VERIFY. The pre-VERIFY rate is reported.
 3. Every completed report for scenario (a) covers the planted driver.
-4. No digits appear in template text outside the allowlist. VERIFY enforces this, but the rate before VERIFY is recorded.
+4. No completed report has digits in its template text. The pre-VERIFY rate is reported.
+
+**Guided mode criterion:** 20 of 20 Guided reports pass VERIFY with no repair. A failure here is a bug in our own code, and it gets fixed before M1 closes.
 
 **Also recorded:**
 - invalid-reference rate before repair
 - repair rate
 - latency and tokens per call
-- two rendered reports, included here so you can judge readability yourself
-- for comparison, a naive regex number check run on the same reports, with its false-pass and false-fail rates
+- two rendered reports per model, so you can judge readability yourself
+
+**Change made before the freeze:** the naive regex number-check comparison is dropped. It would need a second, free-text generation mode plus hand-labeled ground truth. Since slot rendering makes "numbers come from evidence" true by construction, the comparison wouldn't inform any v1 decision.
 
 ## S2 — superseded
 

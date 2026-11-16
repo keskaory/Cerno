@@ -147,3 +147,30 @@ Full log: `reviews/2026-11-15-local-first-review.md`.
 | gemma3:12b (`b92b2185`) | 37% | 7.8 tok/s | 8/12 | 12/12 | — | 12/12 | 13.4 s |
 
 The union fixed the contradiction bug but didn't help the small models. They still map "August" to a relative month, and `qwen3:8b` turned "last month" into November 2024. The 4–8B models do best on the simplest schema (months). Only the 12B model gets everything right, but it's partly on the CPU and about 3× slower. All three substituted a known metric for an unknown one at least once ("churn" → orders_count) in some mode. That's why S2L now has a zero-substitution gate. The probe has 12 questions, so these numbers are directional only.
+
+## 2026-11-15: S2L and S6 frozen before any run
+
+You approved v2.0 and asked for the S2L questions and criteria to be frozen before the benchmark runs. They are now committed on `m1-spikes`, and no model has seen the new questions yet.
+
+**What's frozen:**
+- 40 RESOLVE questions in 8 categories (clear 5, relative 5, date boundary 5, year transition 5, ambiguous 4, unknown metric 8, unsupported period 4, invalid 4), over three dataset contexts. Context C has a partial month.
+- 10 PLAN and 10 ASSESS contexts. Enums run from 16 to 42 values. An earlier draft said 31; I counted, and the largest context has 42.
+- 20 SYNTH scenarios: 7 with a planted driver, 7 with an AOV offset, 6 null.
+- The pass/fail criteria and the selection order in `docs/M1_SPIKES.md` (S2L and S6 sections).
+
+**Hashes** (SHA-256 of the working-tree files at freeze; `run.py` writes the first 16 hex characters of each into every result file, so a result can be checked against this list):
+
+| File | SHA-256 |
+|---|---|
+| questions.json | `55e21b750e91e4bd93ad4616b7d88ca8cce8df6c05105b19fc64833556bc7f23` |
+| resolve.py | `f56ff823173511f44b509f5892f2ca412666df2c64767a3fbe204111c6362ce9` |
+| plan.py | `8709822e5faec9e0331624aecae82d22aa12db1ca0df2d8a1f2bf26953a2ceb7` |
+| synth.py | `8634334eed1cbd6d9c36e0579972bcfaa9df60ab5bb34fae77a1399803c16436` |
+| client.py | `b1aa1fd8fa718e1d4e9faab67898fd9c5abafd75c21308c41c51468f0a8f681c` |
+| run.py | `3ac71f00b3733a969bb119e16df02ad42fa7e09531adaff804b91f19b1c07794` |
+| test_s2l_harness.py | `4c419d085e2d66e39a4e662727b3ed0c875adb30c80b6f9fa0526f57b6a34f90` |
+| M1_SPIKES.md lines 122–249 (S2L + S6 criteria) | `e389a6978b24d5cde122ed4ce3f0554882d17839532bf584fead7556a5293699` |
+
+**Rule from here:** if a model fails, the thresholds stay. A harness bug found after a run gets fixed in a new commit, every model is re-run, and the journal says what changed and why. A threshold change needs your approval.
+
+**Harness tests (71)** check that every question can be answered with its gold answer, that Guided mode passes VERIFY on all scenarios, that each VERIFY rule fires, and the rendering and stats helpers. A low score should mean the model failed, not the harness.
