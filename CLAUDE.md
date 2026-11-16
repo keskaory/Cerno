@@ -34,4 +34,11 @@ An AI analyst that investigates why a business metric changed. Every number in i
 
 ## Commands
 
-None yet. M0 adds `uv run pytest`, `uv run ruff check`, and `uv run mypy`.
+Run from `backend/`, inside WSL:
+
+```bash
+uv sync --group dev --group spikes
+uv run ruff check . && uv run ruff format --check .
+uv run mypy cerno tests
+uv run pytest -m "not live"          # live = real Claude API calls, run manually
+```
