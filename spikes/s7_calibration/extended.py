@@ -72,7 +72,8 @@ def simulate_ext(
     level = np.ones((cb.CELLS, n_months))
     t = np.arange(n_months)[None, :]
     if c.growth:
-        g = rng.uniform(0.5 * c.growth, 1.5 * c.growth, cb.CELLS)[:, None]
+        lo, hi = sorted((0.5 * c.growth, 1.5 * c.growth))  # decline has negative growth
+        g = rng.uniform(lo, hi, cb.CELLS)[:, None]
         level = level * ((1 + g) ** t if c.compound else np.clip(1 + g * t, 0.05, None))
     if c.seasonal_amp:
         phase = rng.uniform(0, 12)
@@ -226,7 +227,9 @@ def analytic_power(d: float, k: int, alpha: float) -> float:
     infl = np.sqrt(1 + 1 / k + (k - t.mean()) ** 2 / ((t - t.mean()) ** 2).sum())
     crit = stats.t.ppf(1 - alpha / 2, k - 2)
     ncp = d / infl
-    return float(stats.nct.sf(crit, k - 2, ncp) + stats.nct.cdf(-crit, k - 2, ncp))
+    # scipy's nct.cdf returns NaN deep in the lower tail at large ncp; that tail is ~0 there.
+    lower = float(np.nan_to_num(stats.nct.cdf(-crit, k - 2, ncp), nan=0.0))
+    return float(stats.nct.sf(crit, k - 2, ncp)) + lower
 
 
 def analytic_table() -> dict[str, Any]:

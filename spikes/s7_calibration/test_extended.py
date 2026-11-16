@@ -49,3 +49,13 @@ def test_analytic_power_sanity() -> None:
     assert abs(ex.analytic_power(0.0, 18, 0.05) - 0.05) < 1e-9  # size = alpha under H0
     assert ex.analytic_power(3, 23, 0.05) > ex.analytic_power(3, 23, 0.05 / 8)
     assert ex.analytic_power(6, 18, 0.05 / 8) > ex.analytic_power(3, 18, 0.05 / 8)
+
+
+def test_analytic_power_has_no_nan_at_large_effects() -> None:
+    assert 0.999 < ex.analytic_power(8, 23, 0.05 / 8) <= 1.0
+
+
+def test_decline_condition_runs_and_stays_positive() -> None:
+    c = next(x for x in ex.CONDITIONS if x.name == "decline_3pct")
+    rev, _ = ex.simulate_ext(np.random.default_rng(3), 24, c)
+    assert (rev > 0).all()
