@@ -351,7 +351,7 @@ On the extended data, 3a would pass (0.16 / 0.43 / 0.79 / 0.95 against 0.12 / 0.
 
 ## S2L v2 results: NO MODEL PASSES
 
-Harness v2 (`5850571`); `run.py` hash `ac2aa3e6` recorded in every results file. Ollama 0.40.16, NVIDIA driver 617.14, all models Q4_K_M, `remote_host` null, temperature 0, seed 1, num_ctx 8192, think off (qwen3 also run with think on, below). num_predict: RESOLVE 256, PLAN 768, ASSESS 768, SYNTH 1536. Results: `spikes/s2l_models/results/`. Run time: 20 min (4b), 139 min (qwen3:8b), 118 min (12b).
+Harness v2 (`5850571`); `run.py` hash `ac2aa3e6` recorded in every results file. Ollama 0.40.16, NVIDIA driver 617.14, all models Q4_K_M, `remote_host` null, temperature 0, seed 1, num_ctx 8192, think off (qwen3 also run with think on, below). num_predict: RESOLVE 256, PLAN 768, ASSESS 768, SYNTH 1536. Results: `spikes/s2l_models/results/v2/` (moved there when v3 started). Run time: 20 min (4b), 139 min (qwen3:8b), 118 min (12b).
 
 ### Gate results
 

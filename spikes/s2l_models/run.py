@@ -1,7 +1,8 @@
 """Spike S2L + S6: run the frozen benchmark against local models. Criteria: docs/M1_SPIKES.md.
 
 Usage (from backend/):  uv run python ../spikes/s2l_models/run.py gemma3:4b qwen3:8b gemma3:12b
-Results: spikes/s2l_models/results/<model>.json (committed), out/<model>.json (full raw, ignored).
+Results: results/v3/<model>.json (committed), out/v3/<model>.json (full raw, ignored).
+Smoke run (no scoring, old v2 questions only):  python run.py --smoke gemma3:4b
 Talks only to the local Ollama server. Costs nothing.
 """
 
@@ -19,7 +20,7 @@ import resolve as rv
 import synth as sy
 
 HERE = Path(__file__).parent
-OUT, RESULTS = HERE / "out", HERE / "results"
+OUT, RESULTS = HERE / "out" / "v3", HERE / "results" / "v3"  # v2 results: results/v2/
 NUM_PREDICT = {"resolve": 256, "plan": 768, "assess": 768, "synth": 1536}
 SCENARIOS = (
     [("a", s) for s in range(7)]
@@ -29,7 +30,7 @@ SCENARIOS = (
 
 
 def frozen_hashes() -> dict[str, str]:
-    names = ["questions.json", "resolve.py", "plan.py", "synth.py", "client.py", "run.py"]
+    names = ["questions_v3.json", "resolve.py", "plan.py", "synth.py", "client.py", "run.py"]
     return {n: hashlib.sha256((HERE / n).read_bytes()).hexdigest()[:16] for n in names}
 
 
@@ -317,9 +318,54 @@ def strip_private(d: Any) -> Any:
     return d
 
 
+SMOKE_QUESTIONS = ("C01", "R05", "U01", "P02")  # from the frozen v2 set, never the held-out set
+
+
+def smoke(model: str) -> None:
+    """A few calls per stage on already-seen inputs, printed for reading by hand. It checks the
+    harness (prompts, schemas, VERIFY) end to end and scores nothing, so it can't bias v3."""
+    old = rv.load(rv.QUESTIONS_V2)
+    rows: list[dict[str, Any]] = []
+    for q in (q for q in old["questions"] if q["id"] in SMOKE_QUESTIONS):
+        ctx = old["contexts"][q["ctx"]]
+        for name, schema in (("months", rv.MonthsOut), ("transcribe", rv.TranscribeOut)):
+            rec = c.call(
+                model,
+                "resolve",
+                rv.system_prompt(ctx, name),
+                q["q"],
+                schema,
+                NUM_PREDICT["resolve"],
+                rv.semantic_problem,
+            )
+            res = rv.resolve(rec.parsed, ctx) if rec.parsed is not None else None
+            rows.append({"stage": f"resolve/{name}", "q": q["q"], "raw": rec.to_json(), "res": res})
+    for ctx in (pl.contexts()[0], pl.contexts()[6]):
+        plan_m, assess_m = pl.models_for(ctx)
+        for stage, (sysp, user), m, check in (
+            ("plan", pl.plan_prompt(ctx), plan_m, functools.partial(pl.plan_problem, ctx)),
+            ("assess", pl.assess_prompt(ctx), assess_m, functools.partial(pl.assess_problem, ctx)),
+        ):
+            rec = c.call(model, stage, sysp, user, m, NUM_PREDICT[stage], check)
+            rows.append({"stage": stage, "ctx": ctx.name, "raw": rec.to_json()})
+    for kind, seed in (("a", 0), ("b", 10), ("c", 20)):
+        sc = sy.scenario(kind, seed)
+        sysp, user = sy.prompt(sc)
+        rec = c.call(model, "synth", sysp, user, sy.SynthOut, NUM_PREDICT["synth"])
+        errs = sy.verify(rec.parsed, sc["evidence"]) if rec.parsed is not None else ["no parse"]
+        rows.append({"stage": "synth", "scenario": kind, "raw": rec.to_json(), "verify": errs})
+    OUT.mkdir(parents=True, exist_ok=True)
+    path = OUT / f"smoke_{model.replace(':', '_')}.json"
+    path.write_text(json.dumps(rows, indent=1, default=str), encoding="utf-8")
+    print(f"wrote {path}")
+
+
 def main() -> None:
-    OUT.mkdir(exist_ok=True)
-    RESULTS.mkdir(exist_ok=True)
+    if sys.argv[1:2] == ["--smoke"]:
+        smoke(sys.argv[2])
+        return
+    OUT.mkdir(parents=True, exist_ok=True)
+    RESULTS.mkdir(parents=True, exist_ok=True)
     data = rv.load()
     for model in sys.argv[1:]:
         t0 = time.time()

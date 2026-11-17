@@ -14,7 +14,8 @@ from pydantic import BaseModel, Field
 
 # *_abs formats drop the sign so "fell by {x}" reads naturally; VERIFY still checks the
 # direction word against the signed value.
-Fmt = Literal["money", "money_abs", "pct", "pct_abs", "number", "label"]
+# v3: "number" removed. No evidence field accepted it, so offering it only invited rejections.
+Fmt = Literal["money", "money_abs", "pct", "pct_abs", "label"]
 
 
 class Slot(BaseModel):
@@ -211,6 +212,10 @@ def scenario(kind: str, seed: int) -> dict[str, Any]:
                 for c in CHANNELS
             ],
         }
+    # v3: period labels as evidence, so a template can name the months through a label slot
+    # instead of writing "October 2025" (digits) into its text.
+    ev["ev_total"]["comparison_period"] = "October 2025"
+    ev["ev_total"]["baseline_period"] = "September 2025"
     return {
         "scenario": kind,
         "seed": seed,
@@ -348,6 +353,8 @@ SEGMENT_NAMES = re.compile(r"\b(" + "|".join(REGIONS + CHANNELS) + r")\b", re.IG
 # Which formats each evidence field may be shown in. Every metric in S6 is money-valued.
 FIELD_FMTS = {
     "segment": {"label"},
+    "comparison_period": {"label"},
+    "baseline_period": {"label"},
     "delta_pct": {"pct", "pct_abs"},
     "unexpected_pct": {"pct", "pct_abs"},
     "share_of_change": {"pct", "pct_abs"},
@@ -453,8 +460,8 @@ def verify(out: SynthOut, ev: dict[str, Any]) -> list[str]:
                 )
         if CAUSAL.search(low):
             errors.append(f"{where}: causal wording is not allowed")
-        if "significant" in low:
-            errors.append(f"{where}: do not use the word 'significant'")
+        if re.search(r"\bsignific", low):
+            errors.append(f"{where}: do not use 'significant' or 'significance'")
         if re.search(r"https?://|www\.|!\[|\]\(|\*\*|<[a-z]", low):
             errors.append(f"{where}: links, markup or HTML are not allowed")
     for seg in sorted(flags - mentioned):
@@ -487,8 +494,13 @@ Rules:
 - Write a headline and 1-6 claims. Each has a "template" and "slots".
 - In templates, put {slot_name} wherever a number or segment name goes. Never write digits.
 - Each slot has: name (lowercase), ref (an evidence reference from the list), fmt:
-  money | money_abs | pct | pct_abs | number | label. Use label for segment names and the
-  _abs formats after a direction word ("fell by {drop}" with pct_abs).
+  money | money_abs | pct | pct_abs | label. Use label for segment names and month names, and
+  the _abs formats after a direction word ("fell by {drop}" with pct_abs).
+- Field units. Money: delta, unexpected, comparison_value, baseline_value, rate_effect,
+  mix_effect, total_effect (for AOV these are dollars per order). Percent: delta_pct,
+  unexpected_pct, share_of_change. Label: segment, comparison_period, baseline_period.
+- Name the months with label slots ({month} with ref ev_total.comparison_period), never by
+  writing them out, because a year is digits.
 - Reference syntax: ev_name.field, or ev_name.rows[segment=X].field
 - Segment names (regions, channels) always go in label slots, never in the template text.
 - Mention every segment whose q is below 0.05. Do not call a segment a driver ("drove",
@@ -497,7 +509,8 @@ Rules:
 - If segment changes in a decomposition mostly offset each other, say the movements offset
   instead of quoting a share of change.
 - Direction words (rose, fell, up, down) must match the sign of the numbers they describe.
-- No causal words (caused, because, due to, led to), no "significant", no links or markup.
+- No causal words (caused, because, due to, led to), no "significant" or "significance",
+  no links or markup.
 - Do not restate the overall outcome; code writes it."""
 
 
@@ -505,7 +518,7 @@ def available_refs(ev: dict[str, Any]) -> list[str]:
     refs = []
     for name, item in ev.items():
         for k, v in item.items():
-            if isinstance(v, int | float):
+            if isinstance(v, int | float) or k.endswith("_period"):
                 refs.append(f"{name}.{k}")
         for r in item.get("rows", []):
             refs.extend(f"{name}.rows[segment={r['segment']}].{k}" for k in r)

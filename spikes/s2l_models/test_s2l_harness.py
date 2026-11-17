@@ -8,7 +8,9 @@ import pytest
 import resolve as rv
 import synth as sy
 
-DATA = rv.load()
+DATA = rv.load(rv.QUESTIONS_V2)  # frozen v2 set; context-specific tests below use it
+DATA_V3 = rv.load()
+BOTH = [(d, q) for d in (DATA, DATA_V3) for q in d["questions"]]
 
 
 def gold_months(a: dict[str, Any]) -> rv.MonthsOut:
@@ -39,9 +41,11 @@ def gold_months(a: dict[str, Any]) -> rv.MonthsOut:
     return rv.MonthsOut.model_validate(base)
 
 
-@pytest.mark.parametrize("q", DATA["questions"], ids=lambda q: q["id"])
-def test_every_question_is_answerable(q: dict[str, Any]) -> None:
-    ctx = DATA["contexts"][q["ctx"]]
+@pytest.mark.parametrize(
+    ("data", "q"), BOTH, ids=[f"{'v3' if d is DATA_V3 else 'v2'}-{q['id']}" for d, q in BOTH]
+)
+def test_every_question_is_answerable(data: dict[str, Any], q: dict[str, Any]) -> None:
+    ctx = data["contexts"][q["ctx"]]
     answerable = False
     for a in q["accept"]:
         out = gold_months(a)
@@ -50,7 +54,11 @@ def test_every_question_is_answerable(q: dict[str, Any]) -> None:
             assert rv.score(result, q["accept"])["correct"], (q["id"], result)
             answerable = True
     if not answerable:  # out_of_range / partial: try the month a literal reading gives
-        months = {"I02": "2031-03", "I03": "2025-03", "I04": "2023-12"}
+        months = (
+            {"I02": "2029-02", "I03": "2026-05", "I04": "2024-03"}
+            if data is DATA_V3
+            else {"I02": "2031-03", "I03": "2025-03", "I04": "2023-12"}
+        )
         out = rv.MonthsOut(
             intent="explain_change",
             metric="revenue",
@@ -60,13 +68,25 @@ def test_every_question_is_answerable(q: dict[str, Any]) -> None:
         assert rv.score(rv.resolve(out, ctx), q["accept"])["correct"]
 
 
-def test_question_set_shape() -> None:
+@pytest.mark.parametrize("data", [DATA, DATA_V3], ids=["v2", "v3"])
+def test_question_set_shape(data: dict[str, Any]) -> None:
     cats: dict[str, int] = {}
-    for q in DATA["questions"]:
+    for q in data["questions"]:
         cats[q["cat"]] = cats.get(q["cat"], 0) + 1
-    assert len(DATA["questions"]) == 40
+    assert len(data["questions"]) == 40
     assert cats["unknown_metric"] >= 8 and cats["unsupported_period"] >= 4
-    assert len({q["id"] for q in DATA["questions"]}) == 40
+    assert len({q["id"] for q in data["questions"]}) == 40
+
+
+def test_v3_has_same_category_counts_and_no_reused_wording() -> None:
+    def counts(d: dict[str, Any]) -> dict[str, int]:
+        out: dict[str, int] = {}
+        for q in d["questions"]:
+            out[q["cat"]] = out.get(q["cat"], 0) + 1
+        return out
+
+    assert counts(DATA) == counts(DATA_V3)
+    assert not {q["q"] for q in DATA["questions"]} & {q["q"] for q in DATA_V3["questions"]}
 
 
 @pytest.mark.parametrize(
@@ -447,3 +467,45 @@ def test_guided_suppresses_share_when_offsetting() -> None:
         if sy.offsetting(sc["evidence"]["ev_dec_region"]):
             assert not any("share_of_change" in r for r in refs)
         assert sy.verify(out, sc["evidence"]) == []
+
+
+# --- v3 fixes (D13) -------------------------------------------------------------------------
+
+
+def test_v3_rules_name_both_intent_values() -> None:
+    for rules in (rv.MONTHS_RULES, rv.TRANSCRIBE_RULES):
+        assert '"explain_change"' in rules and '"other"' in rules
+
+
+def test_v3_period_label_is_a_usable_slot() -> None:
+    sc = sy.scenario("a", 0)
+    assert "ev_total.comparison_period" in sy.available_refs(sc["evidence"])
+    out = sy.SynthOut(
+        headline=claim(
+            "{s} fell by {x} in {m}.",
+            ("s", "ev_base_region.rows[segment=North].segment", "label"),
+            ("x", "ev_base_region.rows[segment=North].unexpected_pct", "pct_abs"),
+            ("m", "ev_total.comparison_period", "label"),
+        ),
+        claims=[claim("ok")],
+    )
+    assert sy.verify(out, sc["evidence"]) == []
+    assert sy.render(out.headline, sc["evidence"]).endswith("in October 2025.")
+    bad = sy.SynthOut(
+        headline=claim("Revenue was {m}.", ("m", "ev_total.comparison_period", "money")),
+        claims=[claim("ok")],
+    )
+    assert sy.verify(bad, sc["evidence"])
+
+
+def test_v3_number_format_is_gone() -> None:
+    with pytest.raises(ValueError):
+        sy.Slot(name="x", ref="ev_total.delta", fmt="number")  # type: ignore[arg-type]
+
+
+def test_v3_significance_is_rejected() -> None:
+    sc = sy.scenario("c", 20)
+    out = sy.SynthOut(
+        headline=claim("The statistical significance of the change is low."), claims=[claim("ok")]
+    )
+    assert any("signific" in e for e in sy.verify(out, sc["evidence"]))

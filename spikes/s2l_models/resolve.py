@@ -12,7 +12,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-QUESTIONS = Path(__file__).parent / "questions.json"
+# v3 runs on a new held-out set; questions.json is the frozen v2 set (used only for smoke runs).
+QUESTIONS = Path(__file__).parent / "questions_v3.json"
+QUESTIONS_V2 = Path(__file__).parent / "questions.json"
 MetricOut = Literal[
     "revenue", "orders_count", "aov", "active_customers", "unknown_metric", "unspecified"
 ]
@@ -65,7 +67,8 @@ class TranscribeOut(BaseModel):
 
 
 MONTHS_RULES = """Return JSON describing the question.
-- intent: "other" if the request is not about explaining a change in a metric.
+- intent: "explain_change" if the request asks why or how a metric changed; "other" if it is
+  not about explaining a change in a metric.
 - metric: one of the defined metrics; "unknown_metric" if the question asks about a metric
   that is not defined; "unspecified" if it names no metric.
 - comparison_month: the month the question asks about, as YYYY-MM. "Last month" means the
@@ -76,7 +79,8 @@ MONTHS_RULES = """Return JSON describing the question.
 
 TRANSCRIBE_RULES = """Return JSON describing the question. Copy periods exactly as the
 question states them; never compute dates.
-- intent: "other" if the request is not about explaining a change in a metric.
+- intent: "explain_change" if the request asks why or how a metric changed; "other" if it is
+  not about explaining a change in a metric.
 - metric: one of the defined metrics; "unknown_metric" if the question asks about a metric
   that is not defined; "unspecified" if it names no metric.
 - comparison: a named month is {"kind": "named_month", "month": 1-12, "year": the year only if
@@ -88,8 +92,8 @@ question states them; never compute dates.
   as comparison."""
 
 
-def load() -> dict[str, Any]:
-    data: dict[str, Any] = json.loads(QUESTIONS.read_text(encoding="utf-8"))
+def load(path: Path = QUESTIONS) -> dict[str, Any]:
+    data: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
     return data
 
 
