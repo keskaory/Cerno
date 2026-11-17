@@ -13,7 +13,6 @@ On 2026-11-15 you approved M0–M1 and accepted D5 and D8. Later that day you se
 | D3 | Frontend: Vite React SPA served by FastAPI | **Vite SPA, same origin** | It also builds the static showcase for GitHub Pages (ARCH §8.1). Next.js was mainly a Vercel argument, and Vercel is out under D9. |
 | D4 | Which local model, at what settings | **Open: no model passed S2L v2** (2026-11-16). Guided mode is the default under the pre-registered rule. | Depends on D13. Results are in `M1_SPIKES.md` → M1 results. |
 | D12 | Replace S7 criterion 3 (power ≥ 0.80 at d = 3) with efficiency against an ideal test plus MDE disclosure | Proposed at the M1 checkpoint | The original bar was unreachable with 12–23 monthly points and 8 tests (ideal single test 0.64–0.75). The original failure stays recorded either way. |
-| D13 | Run S2L v3 (fix 3 harness defects, new held-out questions, same thresholds), or accept Guided as default and Full as experimental | Proposed at the M1 checkpoint | Even a clean v3 may not yield a usable model: only qwen3:8b is near the latency bar. |
 | D6 | ~~Monthly API budget and daily cap~~ | **Superseded by D9** | There's no money to budget. Run limits are now LLM time (ARCH §5.3). |
 | D10 | Free hosted LLM tiers (e.g. free API keys from model vendors) as an optional provider | **No.** Local only. | They need sign-ups, change terms without notice, often train on your data, and break the "nothing leaves the machine" property. The provider interface keeps the option open if you ever want it. |
 | D7 | Where `/ponytail` comes from, if you want it used | — | Not installed and not in the plugin catalog |
@@ -45,6 +44,20 @@ Correctness and security requirements don't change: the worker sandbox, calibrat
 | GitHub Actions (standard runners), GitHub Pages | free for **public** repos (this repo is public, checked 2026-11-15) | Pages: 1 GB site, 100 GB/month soft bandwidth, no commercial SaaS. Making the repo private would make Pages a paid feature. |
 | gitleaks-action v2 | proprietary EULA, free for personal accounts | An organization account would need a license key |
 | Olist dataset | CC BY-NC-SA 4.0 | Non-commercial only. Attribute Olist and Kaggle. A redistributed subset goes in its own folder under the same license. |
+
+### D13 Run S2L v3 (accepted by you, 2026-11-16)
+v3 fixes only the harness defects found after v2:
+- name `"explain_change"` in the RESOLVE rules
+- give SYNTH a period-label evidence field
+- drop the unusable `number` format and state each field's unit
+- reject "significance" as well as "significant"
+
+How it runs:
+- A **new held-out set of 40 questions** is written and frozen before any v3 run, because the v2 questions informed these fixes. The categories and counts stay the same.
+- The thresholds are unchanged, and the v2 results stay the official v2 record.
+- Before the full run: an independent review of the harness, then a hand-read smoke run on the *old* v2 questions. The smoke run scores nothing and can't touch the held-out set.
+
+If no model passes v3, Guided mode stays the default and Full mode stays experimental.
 
 ### D11 `baseline_compare` fits log levels (accepted by you, 2026-11-16)
 Approved at the M1 checkpoint. It replaces "levels" in ADR-010 and ARCH §6.
