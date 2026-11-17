@@ -67,8 +67,8 @@ class TranscribeOut(BaseModel):
 
 
 MONTHS_RULES = """Return JSON describing the question.
-- intent: "explain_change" if the request asks why or how a metric changed; "other" if it is
-  not about explaining a change in a metric.
+- intent: "explain_change" for any question about how a metric moved or compares between
+  months (why, how, what happened, compare); "other" for anything else.
 - metric: one of the defined metrics; "unknown_metric" if the question asks about a metric
   that is not defined; "unspecified" if it names no metric.
 - comparison_month: the month the question asks about, as YYYY-MM. "Last month" means the
@@ -79,8 +79,8 @@ MONTHS_RULES = """Return JSON describing the question.
 
 TRANSCRIBE_RULES = """Return JSON describing the question. Copy periods exactly as the
 question states them; never compute dates.
-- intent: "explain_change" if the request asks why or how a metric changed; "other" if it is
-  not about explaining a change in a metric.
+- intent: "explain_change" for any question about how a metric moved or compares between
+  months (why, how, what happened, compare); "other" for anything else.
 - metric: one of the defined metrics; "unknown_metric" if the question asks about a metric
   that is not defined; "unspecified" if it names no metric.
 - comparison: a named month is {"kind": "named_month", "month": 1-12, "year": the year only if

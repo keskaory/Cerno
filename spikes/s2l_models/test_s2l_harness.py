@@ -509,3 +509,18 @@ def test_v3_significance_is_rejected() -> None:
         headline=claim("The statistical significance of the change is low."), claims=[claim("ok")]
     )
     assert any("signific" in e for e in sy.verify(out, sc["evidence"]))
+    insig = sy.SynthOut(headline=claim("The change was insignificant."), claims=[claim("ok")])
+    assert any("signific" in e for e in sy.verify(insig, sc["evidence"]))
+
+
+def test_v3_q_is_never_shown() -> None:
+    sc = sy.scenario("a", 0)
+    out = sy.SynthOut(
+        headline=claim(
+            "{s} had a score of {qv}.",
+            ("s", "ev_base_region.rows[segment=North].segment", "label"),
+            ("qv", "ev_base_region.rows[segment=North].q", "pct"),
+        ),
+        claims=[claim("ok")],
+    )
+    assert any("q cannot be shown" in e for e in sy.verify(out, sc["evidence"]))

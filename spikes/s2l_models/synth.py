@@ -280,7 +280,7 @@ def render_value(v: Any, fmt: str) -> str:
         )
     if fmt == "pct":
         return f"{v * 100:.1f}%"
-    return f"{v:,.0f}"
+    raise TypeError(f"unknown format {fmt!r}")
 
 
 def render(claim: Claim, ev: dict[str, Any]) -> str:
@@ -355,6 +355,7 @@ FIELD_FMTS = {
     "segment": {"label"},
     "comparison_period": {"label"},
     "baseline_period": {"label"},
+    "q": set(),  # v3: q drives the evidence label; it is never shown as a number
     "delta_pct": {"pct", "pct_abs"},
     "unexpected_pct": {"pct", "pct_abs"},
     "share_of_change": {"pct", "pct_abs"},
@@ -460,7 +461,7 @@ def verify(out: SynthOut, ev: dict[str, Any]) -> list[str]:
                 )
         if CAUSAL.search(low):
             errors.append(f"{where}: causal wording is not allowed")
-        if re.search(r"\bsignific", low):
+        if "signific" in low:  # also catches insignificant / nonsignificant
             errors.append(f"{where}: do not use 'significant' or 'significance'")
         if re.search(r"https?://|www\.|!\[|\]\(|\*\*|<[a-z]", low):
             errors.append(f"{where}: links, markup or HTML are not allowed")
@@ -499,6 +500,7 @@ Rules:
 - Field units. Money: delta, unexpected, comparison_value, baseline_value, rate_effect,
   mix_effect, total_effect (for AOV these are dollars per order). Percent: delta_pct,
   unexpected_pct, share_of_change. Label: segment, comparison_period, baseline_period.
+  q is used by code to decide "beyond normal variation"; never put q in a slot.
 - Name the months with label slots ({month} with ref ev_total.comparison_period), never by
   writing them out, because a year is digits.
 - Reference syntax: ev_name.field, or ev_name.rows[segment=X].field

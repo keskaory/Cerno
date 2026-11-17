@@ -362,6 +362,8 @@ def smoke(model: str) -> None:
 
 def main() -> None:
     if sys.argv[1:2] == ["--smoke"]:
+        if len(sys.argv) != 3:
+            raise SystemExit("usage: run.py --smoke MODEL")
         smoke(sys.argv[2])
         return
     OUT.mkdir(parents=True, exist_ok=True)
