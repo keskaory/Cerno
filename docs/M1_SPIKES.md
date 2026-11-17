@@ -367,12 +367,25 @@ On the extended data, 3a would pass (0.16 / 0.43 / 0.79 / 0.95 against 0.12 / 0.
 
 Non-planted regions were flagged at 1.1–2.3%. These numbers are close to the stream-7 numbers from `extended.py` (0.16 / 0.43 / 0.79 / 0.95).
 
-**How to read the pass: it shows the method isn't wasting power, not that it beats the ideal.** The like-for-like column (the region's raw p at α/8, the same threshold the ideal uses) is *above* the ideal by 0.06–0.12. No test can beat the ideal at the same α and the same effect, so the difference has to come from the effect size, not the test. d is measured in *level* residual SDs, but the test runs on *logs*. A drop of x% of the level is a log drop of −ln(1 − x), which is larger than x, and the region's SD is about 7% of its level, so the planted drops are 14–35%. *Diagnostic, after the run:* solving for the d at which the ideal test matches the raw-p rate gives 2.32 / 3.42 / 4.49 / 5.64, which is 12–16% above nominal. The pre-run review expected this bias to be a few percent; it is larger.
+**How to read the pass: the test is as powerful as an ideal one; the gate's margin comes from how the drop is planted.** The like-for-like column (the region's raw p at α/8, the same threshold as the ideal) is *above* the ideal by 0.06–0.12. A post-run diagnostic (`d12_diagnostic.py`, seed root 99, never the 1216 stream; found by the results review and reproduced independently) explains why:
 
-So the honest summary is that log-level `baseline_compare` with BH performs about as well as an ideal single test would on the same effect. BH adds only 0.01–0.02 over the raw α/8 test. The gate, as D12 wrote it, passes with room to spare partly because its d unit is generous.
+| d | ideal | pure log shift of d SDs | concavity only | as planted in `d12_check.py` | published (1216) raw p |
+|---|---|---|---|---|---|
+| 2 | 0.122 | 0.122 | 0.148 | 0.173 | 0.180 |
+| 3 | 0.349 | 0.355 | 0.466 | 0.475 | 0.472 |
+| 4 | 0.645 | 0.639 | 0.819 | 0.767 | 0.770 |
+| 5 | 0.868 | 0.866 | 0.973 | 0.936 | 0.943 |
 
-**Proposed for the M3 calibration suite (needs your approval; not applied):** measure d for the D12 power gate in *log* residual SDs, estimated the same way, so the gate compares like with like. The ARCH §6 text says only "residual SDs", which leaves the scale open.
+- **The test itself is ideal.** On a pure log shift, raw-p power matches the analytic t-test within 0.006.
+- **The d unit isn't the cause.** Pooled level SD ÷ mean level equals the pooled log SD to within 0.1%.
+- **Two planting effects are the cause:**
+  - *Concavity.* A drop of x of the level is a log drop of −ln(1 − x) > x. The planted drops are about 14–37% of the level.
+  - *Noise at the test point.* `plant_drop` subtracts a fixed revenue amount from the noisy last month, so on the log scale that month's noise is multiplied by 1/(1 − x), about 1.16× at d = 2 and 1.5× at d = 5. A noisier test point flattens the power curve: more power at small d, less at large d. Together the two effects reproduce the published numbers within sampling error.
+- So the planted effect isn't a pure shift, and a single "effective d" (2.32 / 3.42 / 4.49 / 5.64 by inverting the ideal curve) misdescribes it. Those values also carry about ±5% sampling error.
 
+The honest summary: log-level `baseline_compare` loses nothing against an ideal single test, and BH adds 0.00–0.02 over the raw α/8 test. The gate as D12 wrote it passes partly because the planted effect is larger than its nominal d. That doesn't change the pass, and the run used the scripts frozen at `76e163a`; the JSON records `7c39f01`, a docs-only commit after it.
+
+**Proposed for the M3 calibration suite (needs your approval; not applied):** for the D12 power gate, measure d in *log* residual SDs and plant the drop *multiplicatively* (scale the region's last month by exp(−d·σ_log)), so the planted effect is a pure shift and the comparison with the ideal is like for like. Reports to users keep the MDE as a % of the level (D12 3b).
 
 ## S2L v2 results: NO MODEL PASSES
 

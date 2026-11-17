@@ -12,3 +12,5 @@ An independent reviewer read `spikes/s7_calibration/d12_check.py` against D12, `
 | 6 | Info | Runtime about 20–25 s. | — |
 
 Verdict: safe to freeze and run after #2; #1's reported check added.
+
+**After the run:** finding 5's "a few percent, slightly in the method's favour" was wrong. The results review (`2026-11-16-d12-check-results-review.md`) showed a 12–16% gain. It comes from how the drop is planted, not from the d unit.
