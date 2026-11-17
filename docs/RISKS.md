@@ -5,7 +5,7 @@ Status: **v2.0 draft** (2026-11-15). v1.1 came from the architecture review. v2.
 | # | Risk | L | I | State |
 |---|---|---|---|---|
 | R1 | Queries run fine but answer the wrong question (wrong join, grain, filter or period) | Med | High | assumed mitigated |
-| R2 | Statistical conclusions are overstated | **High** | High | **S7 failed** (2026-11-16); log-level revision investigated, not adopted |
+| R2 | Statistical conclusions are overstated | **High** | High | **S7 failed** (2026-11-16); log levels adopted (D11), power criterion open (D12) |
 | R3 | Untrusted SQL or files escape the sandbox, steal secrets or exhaust resources | Low | High | assumed mitigated |
 | R4 | ~~API spend runs away~~ (retired by D9: no paid APIs). Replaced by R14. | — | — | retired |
 | R5 | Reports are wrong but look verified (hallucination, injection steering) | Med | High | assumed mitigated |

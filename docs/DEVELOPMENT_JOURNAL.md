@@ -239,3 +239,11 @@ I kept the v2 scores as the result. A diagnostic re-score puts gemma3:12b at exa
 - I proposed a replacement criterion (efficiency against the ideal test, plus MDE disclosure) for approval. It isn't applied.
 
 Second independent review: `reviews/2026-11-16-m1-results-review.md`. It corrected my pass count (13 → 15) and showed the "6 SDs with growth" was a units artifact. No verdict changed.
+
+## 2026-11-16: D11 approved: `baseline_compare` fits log levels
+
+You approved log-level modeling at the M1 checkpoint.
+- **Recorded:** D11 in `DECISIONS.md` (on `main`, `d06d1aa`). ADR-010 and ARCH §6 are revised: log-scale OLS, the interval transformed back (so asymmetric), a new gate for a zero comparison month, descriptive-only for metrics that can be negative, and the measured limits. Steep linear growth or decline still breaks calibration, and an 80% MDE is about 28% of a region's month.
+- **Not changed:** S7 stays recorded as failed. The power criterion is still open (D12), as are S2L v3 vs. Guided default (D13), the model (D4) and the timeline (D1).
+- **Still owed:** a calibration run of the product's `baseline_compare` (M3 eval suite), because the spike code isn't the product code.
+- **Learning guide:** added a worked log-scale example with numbers checked in Python. It shows a −13.9% month with p = 0.008 that BH *doesn't* flag on its own among 8 tests.

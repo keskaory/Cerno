@@ -277,7 +277,7 @@ Reported only: `seasonal_null` any-driver 0.018; `null_month_ar` (ρ = 0.4) 0.05
 
 **S7 stays failed.** The work below investigates a revision. It doesn't change this verdict.
 
-### Investigation: log-level modeling (approved for investigation, not adopted)
+### Investigation: log-level modeling (adopted by you as D11 on 2026-11-16; S7 itself stays failed)
 
 **Same scenarios, log scale** (`run.py --log` → `results/s7_log.json`): criteria 1, 2, 4 and 5 pass (trend any-driver 0.051, coverage 0.948). Criterion 3 fails: power 0.49 at d = 3.
 

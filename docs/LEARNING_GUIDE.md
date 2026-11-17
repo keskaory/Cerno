@@ -239,7 +239,16 @@ The generator tries to look like a shop:
 ### What S7 found (frozen criteria, levels)
 The formula matches statsmodels to 1e-14, and with flat data the method is calibrated: any-driver 0.040, coverage 0.955. **With growth it breaks:** any-driver 0.107 and coverage 0.925. The reason is **heteroskedasticity**. Business noise is roughly proportional to the level, so in a growing series the newest month is the noisiest. But `s` is estimated from the whole history, which is mostly smaller months, so the interval is too narrow exactly where it's used.
 
-**The fix under investigation: log levels.** On `log(y)`, noise proportional to the level becomes constant, so the constant-variance assumption holds again. A drop of x% becomes a fixed log difference whatever the size. The cost: the interval is no longer symmetric in dollars after you transform back, `log(0)` is undefined (segments with a zero month are already gated out), and linear growth in dollars is slightly curved in logs.
+**The fix, adopted as D11: log levels.** On `log(y)`, noise proportional to the level becomes constant, so the constant-variance assumption holds again. A drop of x% becomes a fixed log difference whatever the size. The cost:
+- The interval is no longer symmetric in dollars after you transform back.
+- `log(0)` is undefined, so a segment with a zero month, including the comparison month, is gated out as `not_estimable`.
+- Growth that's linear in dollars is curved in logs. At 1–3% a month that doesn't matter. At 5–8% a month, or with a linear decline, S7 extended showed calibration breaking (false positives up to 0.27 for the decline). Compounding growth, which is a straight line in logs, is fine.
+
+**Worked example (log scale).** A region's fitted log level predicts `ln(y) = 10.30` for October, with `SE = 0.05` and k = 18, so 16 df and t₀.₉₇₅ ≈ 2.12. The observed value is `ln(y) = 10.15`.
+- `t = (10.15 − 10.30) / 0.05 = −3.0`, so two-sided p ≈ 0.008.
+- Predicted level: `exp(10.30) ≈ 29,733` per day. Observed: `exp(10.15) ≈ 25,591`. The unexpected change is about −4,142 per day, or `exp(−0.15) − 1 ≈ −13.9%`.
+- 95% interval: `exp(10.30 ± 2.12·0.05)`, which is `[26,742, 33,057]`. It's wider above the prediction (+3,325) than below (−2,990). That's the asymmetry.
+- With 8 tests, BH needs p ≤ 0.05·rank/8. As the only small p-value, 0.008 needs ≤ 0.00625, so it **isn't flagged** unless other segments also have small p-values. That's the power limit in action.
 
 ### Power, MDE and why 80% at d = 3 was too much
 **Power** depends on effect size, noise, sample size and α. Here each test has only 11–22 residual degrees of freedom, and BH across 8 tests means a lone flag needs p ≲ 0.05/8 = 0.006. An ideal test at that threshold catches a 3-SD drop only 26% of the time at k = 12 and 41% at k = 23, or 35% averaged over k = 12–23. Even with no correction at all it's 64–75%. You can compute this exactly with the noncentral t-distribution (`analytic_power` in `extended.py`). So the original "80% at d = 3" bar wasn't reachable under the spike's own assumptions. About 5 SDs is what 80% takes. The **minimum detectable effect (MDE)** turns the question around: how big must a drop be to be caught 80% of the time? Reporting the MDE tells you what the tool *can't* see, which matters as much as what it flags.

@@ -89,7 +89,8 @@ Python only: no web server, no app DB. Runs are saved as JSON files under `runs/
 - **M1 at checkpoint** (2026-11-16). Spike code and results live on `m1-spikes`.
   - Done: S3 (Windows), S7 (failed; log-level revision investigated), S2L v2 (no model passes → Guided default), S6 (fails for every model; Guided passes).
   - Blocked: S1 and the S3 re-run need WSL2, which isn't installed. You need to install it.
-  - Decisions waiting for you are listed in the M1 checkpoint.
+  - Decided: D11 (`baseline_compare` on log levels, 2026-11-16).
+  - Waiting for you: D12 (power criterion), D13 (S2L v3 or Guided default), D4 (model), D1 (timeline).
   - **Branch dependency:** `m1-spikes` is branched from `m0-tooling`, because it needs the `spikes` dependency group and the CI config. Merge `m0-tooling` first. If M0 changes during review, `m1-spikes` gets those changes by a merge, not a rebase.
   - **Planning docs** go directly to `main` (D8) and are merged into the feature branches.
 - **M2 not approved.** It waits for the M1 checkpoint (results, remaining risks and an updated recommendation) and your approval.
