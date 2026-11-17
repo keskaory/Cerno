@@ -260,6 +260,8 @@ The formula matches statsmodels to 1e-14, and with flat data the method is calib
 ### Power, MDE and why 80% at d = 3 was too much
 **Power** depends on effect size, noise, sample size and α. Here each test has only 11–22 residual degrees of freedom, and BH across 8 tests means a lone flag needs p ≲ 0.05/8 = 0.006. An ideal test at that threshold catches a 3-SD drop only 26% of the time at k = 12 and 41% at k = 23, or 35% averaged over k = 12–23. Even with no correction at all it's 64–75%. You can compute this exactly with the noncentral t-distribution (`analytic_power` in `extended.py`). So the original "80% at d = 3" bar wasn't reachable under the spike's own assumptions. About 5 SDs is what 80% takes. The **minimum detectable effect (MDE)** turns the question around: how big must a drop be to be caught 80% of the time? Reporting the MDE tells you what the tool *can't* see, which matters as much as what it flags.
 
+**What replaced the bar (D12).** You approved a fairer test: the method's power must be at least an ideal test's power at α/8, minus 0.05. It passed on a fresh seed stream (0.48 against an ideal 0.35 at d = 3). But "beating the ideal" should make you suspicious, since nothing can beat an ideal test on the same problem. The diagnostic found why: the simulation plants the drop by subtracting dollars from a noisy month. On the log scale that's a bigger and noisier effect than "d SDs" says. On a clean log shift, the method matches the ideal test almost exactly. Lesson: when a result looks too good, check what the simulation actually did before believing it.
+
 ### Things to remember
 - Calibration is checked under assumptions you chose. Real data can break them in ways the generator doesn't have, such as structural breaks, outliers or new segments. That's why the extended run tries many conditions and reports each one.
 - A conservative test (false positives below α) isn't free. It costs power. With seasonality the method was very conservative (any-driver 0.018), because the seasonal swing inflates `s`.
@@ -270,6 +272,7 @@ The formula matches statsmodels to 1e-14, and with flat data the method is calib
 3. BH assumes positive dependence or independence. Why are these 8 tests dependent, and what does BY do differently?
 4. What is the MDE, and why should a report show it next to a "no meaningful change" outcome?
 5. The original S7 failed, and the log-level version passes some of the same criteria. Why doesn't that make the original spike a pass?
+6. The D12 check found raw-p power above the ideal test's. Why is that impossible for a pure shift, and what did the simulation do differently?
 
 ---
 

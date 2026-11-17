@@ -5,7 +5,7 @@ Status: **v2.0 draft** (2026-11-15). v1.1 came from the architecture review. v2.
 | # | Risk | L | I | State |
 |---|---|---|---|---|
 | R1 | Queries run fine but answer the wrong question (wrong join, grain, filter or period) | Med | High | assumed mitigated |
-| R2 | Statistical conclusions are overstated | **High** | High | **S7 failed** (2026-11-16); log levels adopted (D11), power criterion open (D12) |
+| R2 | Statistical conclusions are overstated | **High** | High | **S7 failed** (2026-11-16); log levels adopted (D11); revised power criterion (D12) passes on a fresh stream |
 | R3 | Untrusted SQL or files escape the sandbox, steal secrets or exhaust resources | Low | High | assumed mitigated |
 | R4 | ~~API spend runs away~~ (retired by D9: no paid APIs). Replaced by R14. | — | — | retired |
 | R5 | Reports are wrong but look verified (hallucination, injection steering) | Med | High | assumed mitigated |
@@ -34,6 +34,7 @@ Status: **v2.0 draft** (2026-11-15). v1.1 came from the architecture review. v2.
 - **Validation:** the calibration suite (about 200 seeds per PR, ≥ 1,000 nightly). This turns "assumed" into "validated" on our data generator, though not on real data.
 - **What's left:** with 12–23 points the intervals are wide. Annual seasonality and curved growth break the linear-trend assumption. Calibration measures that failure on a seasonal scenario but doesn't fix it.
 - **S7 result (2026-11-16): failed.** In levels, false positives with growth were 0.107 and coverage 0.925, because noise scales with the level. Log levels fix this in 15 of 19 tested conditions, including moderate and compounding growth, but fail for steep linear growth (5–8%/mo) or linear decline, where the series curves on the log scale. Power at d = 3 is 0.37 (levels) or 0.49 (log) against 0.80, a bar an ideal test can't reach with 12–23 monthly points and 8 tests (ideal ≈0.35). The MDE for 80% power is about 4 residual SDs, about a 28% drop in a region. See `M1_SPIKES.md` → M1 results.
+- **D12 (accepted 2026-11-16):** the power bar is now efficiency against an ideal test plus MDE disclosure. It passed on a fresh seed stream. On a pure log shift the method matches the ideal test within 0.006; the gate's margin comes from how the simulation plants the drop. The M3 gate should plant multiplicatively (proposal, needs approval).
 - **Fallback:** if a tool can't pass calibration, it returns descriptive output only.
 
 ### R3 — Sandbox escape

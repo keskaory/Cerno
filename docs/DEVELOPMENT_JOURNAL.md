@@ -282,3 +282,11 @@ The full v3 run took about 4.5 h on the frozen harness (`ebf15a3`). Results: `M1
 - **S6:** 1 / 4 / 8 of 20 completed. The digit problem is gone; what's left are genuine rule breaches.
 
 What I learned: fixing the harness was worth it. RESOLVE went from near zero to near the bar, so the v2 numbers mostly measured my prompt. But the real model weakness underneath is substitution, and that's the one that matters for an analyst. The independent results review (`reviews/2026-11-16-s2l-v3-results-review.md`) changed no verdict. It found a second lenient VERIFY gap ("fell by -$110,283" passes), corrected several numbers I'd copied or mislabelled (the "420 calls" came from v2), and asked for the full failure breakdown, which is now in the write-up. Both lenient gaps only flatter the models. A pre-run review mostly catches defects that push scores down; leniency only shows up when you read the outputs that passed.
+
+## 2026-11-16: D12 approved; criterion 3a passes on a fresh stream, with a catch
+
+You approved D12. I recorded it on `main` (DECISIONS, ARCH §6: the MDE on every `baseline_compare` result and a nightly power gate). Then I checked 3a once on a fresh seed stream, as I'd said I would. The script was reviewed, frozen at `76e163a` with hashes in M1_SPIKES, and run once (17 s). **It passes at every d:** log BH power 0.198 / 0.483 / 0.787 / 0.945 against bars of 0.073 / 0.298 / 0.597 / 0.818.
+
+The catch: the like-for-like number (raw p at α/8) came out *above* the ideal test. That can't happen for a pure shift. My first guess at the cause, the pooled SD unit, was wrong; the results review showed the unit is exact. The real cause is the simulation itself. `plant_drop` subtracts dollars from a noisy last month, which on the log scale is both a bigger shift (concavity) and a noisier test point. I reproduced this in `d12_diagnostic.py` (seed root 99). On a clean log shift, the test matches the ideal within 0.006. So the method is as efficient as a test can be, and the pass margin is partly an artifact of how the drop is planted. That's a proposal for the M3 gate (plant multiplicatively), not a change to this result.
+
+Lesson: a result that beats a theoretical bound is a bug report about the experiment, not good news about the method.
