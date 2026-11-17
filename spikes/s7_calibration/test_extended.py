@@ -3,6 +3,7 @@
 import calib as cb
 import extended as ex
 import numpy as np
+import pytest
 
 
 def test_default_condition_matches_original_generator() -> None:
@@ -59,3 +60,23 @@ def test_decline_condition_runs_and_stays_positive() -> None:
     c = next(x for x in ex.CONDITIONS if x.name == "decline_3pct")
     rev, _ = ex.simulate_ext(np.random.default_rng(3), 24, c)
     assert (rev > 0).all()
+
+
+def test_d12_check_small_run_is_consistent(monkeypatch: pytest.MonkeyPatch) -> None:
+    import d12_check as d12
+
+    monkeypatch.setattr(d12, "ROOT", 99)  # never touch the pre-registered stream in tests
+    sd = d12.region_sd(n=20)
+    assert sd.shape == (cb.REGIONS,) and (sd > 0).all()
+    p = d12.power_point(0, 4.0, sd, n=12)
+    assert 0 <= p["power_log"] <= 1 and 0 <= p["ideal_alpha_over_8"] <= 1
+    assert p["bar"] == round(p["ideal_alpha_over_8"] - d12.MARGIN, 4)
+    assert p["pass"] == (p["power_log"] >= p["ideal_alpha_over_8"] - d12.MARGIN)
+
+
+def test_d12_stream_is_separate() -> None:
+    import d12_check as d12
+
+    a = d12.rng(0, 0).random(3)
+    b = ex.rng_for(0, 0).random(3)
+    assert not np.allclose(a, b)
