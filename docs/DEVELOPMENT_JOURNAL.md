@@ -265,3 +265,10 @@ Frozen at `ebf15a3`. No v3 model output existed before this point. SHA-256:
 | test_s2l_harness.py | `632d1ef011e66192ec75e142d91566fd3f589bfad0dadfa0880ac441a36ef0a8` |
 
 `run.py` writes the first 16 hex digits of each into every results file, so a result can be matched to this freeze. Next: a smoke run on the v2 questions, read by hand. If it forces a change, that change gets its own review and new hashes before the full run.
+
+Smoke run (gemma3:4b, v2 questions C01, R05, U01, P02, plan contexts 0 and 6, synth scenarios a, b, c; `out/v3/smoke_gemma3_4b.json`, not scored), read by hand:
+- The three D13 fixes work. Every RESOLVE output used `explain_change`, SYNTH filled month names through the period-label slots, and no output asked for `number`.
+- Every failure was the model's. Transcribe put `same_month_last_year` where the question named September or no baseline. "Churn" became `active_customers`. "Last week" became a month after the retry. PLAN repeated a dimension, used the out-of-scope `promo`, and left out `segment` on `describe_change` although the field exists. SYNTH showed `delta` (dollars) as a percent while `delta_pct` was available, and wrote "{month} compared to {month}".
+- One leniency in VERIFY, present in v2 too: a template can write a literal `%` after a percent slot ("{share}%"), which renders as "%%". It can only make a model look better, it doesn't put a number in model text, and changing VERIFY now would need another review. So I left it, and I'll count those templates in the results.
+
+No change forced; the full run uses the frozen `ebf15a3` harness.
