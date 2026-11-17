@@ -247,3 +247,21 @@ You approved log-level modeling at the M1 checkpoint.
 - **Not changed:** S7 stays recorded as failed. The power criterion is still open (D12), as are S2L v3 vs. Guided default (D13), the model (D4) and the timeline (D1).
 - **Still owed:** a calibration run of the product's `baseline_compare` (M3 eval suite), because the spike code isn't the product code.
 - **Learning guide:** added a worked log-scale example with numbers checked in Python. It shows a −13.9% month with p = 0.008 that BH *doesn't* flag on its own among 8 tests.
+
+## 2026-11-16: S2L v3 harness frozen before any run
+
+Per D13 I wrote the v3 fixes and a new held-out set of 40 questions (contexts D, E, F; same categories and counts as v2). An independent review found six issues, all fixed before freezing (`reviews/2026-11-16-s2l-v3-prerun-review.md`). The worst was that "insignificant" slipped past the significance check. A similarity scan showed some held-out questions were close to v2 wording, so I reworded the closest ones. The remaining matches share a sentence template but use different months and metrics.
+
+Frozen at `ebf15a3`. No v3 model output existed before this point. SHA-256:
+
+| File | SHA-256 |
+|---|---|
+| questions_v3.json | `71cd4ccb2da1bb0e8c3e60255a1db42ef8a291584be37df65feec017307c6837` |
+| resolve.py | `8d5d47d0c84d84eb945cb04543fc2c1fe77f330ba52d4c19a0173efd630b44af` |
+| plan.py | `d5c44696128d40fa13849cd10c1d5bd4e6ce991f2033a10072423027005a3ced` |
+| synth.py | `c7f840b2fe103286c85d399f730b5f4574a9a7835a7b685201bc00fef640f37e` |
+| client.py | `531e720e41154d17e8ec782767bf1cab2b8a0e99673e763f7936e65654b851b8` |
+| run.py | `089afaec8bf34d36f1d3ddb0a842d15a3a38edee63cda155cb9f139c671659c6` |
+| test_s2l_harness.py | `632d1ef011e66192ec75e142d91566fd3f589bfad0dadfa0880ac441a36ef0a8` |
+
+`run.py` writes the first 16 hex digits of each into every results file, so a result can be matched to this freeze. Next: a smoke run on the v2 questions, read by hand. If it forces a change, that change gets its own review and new hashes before the full run.
