@@ -349,6 +349,15 @@ Replace criterion 3 with two parts, both stated before any new run:
 
 On the extended data, 3a would pass (0.16 / 0.43 / 0.79 / 0.95 against 0.12 / 0.35 / 0.65 / 0.87). That's stated for transparency. The criterion should be checked on a fresh run with a new seed stream if you approve it.
 
+### D12 criterion 3a check (accepted by you 2026-11-16; pre-registered before the run)
+
+`spikes/s7_calibration/d12_check.py`, frozen at `76e163a` before any draw from its seed stream. SHA-256: `d12_check.py` `02f9af66…7ecb`, `extended.py` `f729b4c9…98df`, `calib.py` `00904387…27c9`. Independent pre-run review: `reviews/2026-11-16-d12-check-prerun-review.md`.
+- Flat condition, seed root 1216 (unused by every earlier S7 run), d unit estimated on this stream's own 1,000 null seeds.
+- 1,000 seeds per d at d = 2, 3, 4, 5. Gate: log-scale BH power ≥ ideal single test at α/8 (averaged over the realized k) − 0.05 at every d. If any d fails, 3a is recorded as failed. One run, no rerun.
+- Reported only: a like-for-like check (the region's raw p < α/8), because the BH gate is lenient. The planted drop also moves the total and the channels, which loosens BH's threshold for the region.
+
+*Result: pending the run.*
+
 ## S2L v2 results: NO MODEL PASSES
 
 Harness v2 (`5850571`); `run.py` hash `ac2aa3e6` recorded in every results file. Ollama 0.40.16, NVIDIA driver 617.14, all models Q4_K_M, `remote_host` null, temperature 0, seed 1, num_ctx 8192, think off (qwen3 also run with think on, below). num_predict: RESOLVE 256, PLAN 768, ASSESS 768, SYNTH 1536. Results: `spikes/s2l_models/results/v2/` (moved there when v3 started). Run time: 20 min (4b), 139 min (qwen3:8b), 118 min (12b).
