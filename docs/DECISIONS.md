@@ -11,7 +11,9 @@ On 2026-11-15 you approved M0–M1 and accepted D5 and D8. Later that day you se
 | D1 | Timeline and weekly hours | — | Sets milestone sizing and what gets cut |
 | D2 | App DB: SQLite on local disk vs. Postgres | **SQLite** (WAL), portable SQLAlchemy | After D9 there's no hosted DB to consider. SQLite is a file, needs no server, and costs nothing. |
 | D3 | Frontend: Vite React SPA served by FastAPI | **Vite SPA, same origin** | It also builds the static showcase for GitHub Pages (ARCH §8.1). Next.js was mainly a Vercel argument, and Vercel is out under D9. |
-| D4 | Which local model, at what settings | Pick by spike S2L (criteria in `M1_SPIKES.md`) | Replaces "Opus vs. a cheaper model". Preliminary probe results are in the journal, 2026-11-15. |
+| D4 | Which local model, at what settings | **Open: no model passed S2L v2** (2026-11-16). Guided mode is the default under the pre-registered rule. | Depends on D13. Results are in `M1_SPIKES.md` → M1 results. |
+| D12 | Replace S7 criterion 3 (power ≥ 0.80 at d = 3) with efficiency against an ideal test plus MDE disclosure | Proposed at the M1 checkpoint | The original bar was unreachable with 12–23 monthly points and 8 tests (ideal single test 0.64–0.75). The original failure stays recorded either way. |
+| D13 | Run S2L v3 (fix 3 harness defects, new held-out questions, same thresholds), or accept Guided as default and Full as experimental | Proposed at the M1 checkpoint | Even a clean v3 may not yield a usable model: only qwen3:8b is near the latency bar. |
 | D6 | ~~Monthly API budget and daily cap~~ | **Superseded by D9** | There's no money to budget. Run limits are now LLM time (ARCH §5.3). |
 | D10 | Free hosted LLM tiers (e.g. free API keys from model vendors) as an optional provider | **No.** Local only. | They need sign-ups, change terms without notice, often train on your data, and break the "nothing leaves the machine" property. The provider interface keeps the option open if you ever want it. |
 | D7 | Where `/ponytail` comes from, if you want it used | — | Not installed and not in the plugin catalog |
@@ -43,6 +45,19 @@ Correctness and security requirements don't change: the worker sandbox, calibrat
 | GitHub Actions (standard runners), GitHub Pages | free for **public** repos (this repo is public, checked 2026-11-15) | Pages: 1 GB site, 100 GB/month soft bandwidth, no commercial SaaS. Making the repo private would make Pages a paid feature. |
 | gitleaks-action v2 | proprietary EULA, free for personal accounts | An organization account would need a license key |
 | Olist dataset | CC BY-NC-SA 4.0 | Non-commercial only. Attribute Olist and Kaggle. A redistributed subset goes in its own folder under the same license. |
+
+### D11 `baseline_compare` fits log levels (accepted by you, 2026-11-16)
+Approved at the M1 checkpoint. It replaces "levels" in ADR-010 and ARCH §6.
+- **Why:** S7 failed on levels because noise scales with the level, so in growing data the newest month is noisiest. False positives were 0.107 and coverage 0.925. On log levels the same scenarios give 0.051 and 0.948, and 15 of 19 extended conditions pass the calibration criteria (`M1_SPIKES.md` → M1 results).
+- **What it doesn't fix:**
+  - Steep linear growth or decline (≥ 5%/month), which curves in log space, still fails calibration.
+  - The power criterion still fails; that's D12, a separate and still open decision.
+  - **S7 stays recorded as failed.** D11 adopts a revision; it doesn't make the original spike pass.
+- **Consequences:**
+  - The metric must be strictly positive in every period used, so a zero comparison month is `not_estimable`.
+  - The prediction interval is computed on the log scale and transformed back, so it's asymmetric in metric units.
+  - Metrics that can be negative get descriptive output only.
+  - A product-level calibration run on the revised method is still required (M3 eval suite).
 
 ### D8 Git workflow (accepted 2026-11-15)
 - **Code:** a feature branch per milestone or spike (`m0-tooling`, `m1-s1-sandbox`, …), merged into `main` through a PR.
@@ -87,8 +102,8 @@ The model returns typed step lists via structured outputs and code executes them
 ### ADR-009 Slot-based claims; numbers rendered by code (proposed)
 The model writes templates that reference evidence fields, and code renders the numbers. This makes "every number traces to evidence" true by construction, and VERIFY checks everything else (coverage, direction, wording).
 
-### ADR-010 Period changes are judged against a historical baseline, not row-level tests (proposed)
-With full-population data, row-level p-values measure nothing useful. "Is this change unusual compared with recent comparable periods?" is the honest question. Fit a linear trend to the k ≥ 12 months before the comparison month and ask whether the comparison month falls outside the one-step-ahead prediction interval (t with k−2 df). Run this for the total and for every segment, and apply BH across all of them. With fewer than 12 months, the result is "not estimable". Group comparisons at the customer level are deferred.
+### ADR-010 Period changes are judged against a historical baseline, not row-level tests (proposed; revised by D11)
+With full-population data, row-level p-values measure nothing useful. "Is this change unusual compared with recent comparable periods?" is the honest question. Fit a linear trend to the **log** of the k ≥ 12 monthly levels before the comparison month (D11) and ask whether the comparison month falls outside the one-step-ahead prediction interval (t with k−2 df). Run this for the total and for every segment, and apply BH across all of them. With fewer than 12 months, the result is "not estimable". Group comparisons at the customer level are deferred.
 
 ### ADR-011 Single local machine, single origin, static showcase (proposed; revised for D9)
 Your machine (WSL2) runs the API, the worker pool, the SQLite app DB, the DuckDB files and the built SPA, on 127.0.0.1. The public demo is the same SPA in replay-only mode on GitHub Pages. Escape routes to a hosted version stay cheap: `owner_id` everywhere, an ID-only runner, and portable SQLAlchemy.
