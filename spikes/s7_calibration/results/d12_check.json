@@ -1,0 +1,101 @@
+{
+ "env": {
+  "git_commit": "7c39f012ad51a8fc8e1bfad76b2c9b4bbf5e96de",
+  "sha256": {
+   "d12_check.py": "02f9af665e5755a6decca232fa31a0cbbff437657f31fec45b716a5c15f47ecb",
+   "extended.py": "f729b4c9f69c9966826cf55608e20d25823e88333fc16febba4815e14a0298df",
+   "calib.py": "0090438740cb7269c463e609215b0dc1b1b5e03ddefe99429ce4153b48e627c9"
+  },
+  "python": "3.12.16",
+  "numpy": "2.5.5",
+  "scipy": "1.18.1",
+  "platform": "Windows-11-10.0.26200-SP0"
+ },
+ "root_seed": 1216,
+ "region_sd_revenue_per_day": [
+  485.44,
+  421.19,
+  288.08,
+  219.62
+ ],
+ "points": [
+  {
+   "d": 2,
+   "n": 1000,
+   "power_log": 0.198,
+   "power_log_wilson95": [
+    0.1745,
+    0.2238
+   ],
+   "power_level": 0.152,
+   "ideal_alpha_over_8": 0.1227,
+   "bar": 0.0727,
+   "pass": true,
+   "power_log_raw_p_alpha_over_8": 0.18,
+   "power_log_raw_p_alpha_over_8_wilson95": [
+    0.1574,
+    0.205
+   ],
+   "other_region_flag_rate_log": 0.0113
+  },
+  {
+   "d": 3,
+   "n": 1000,
+   "power_log": 0.483,
+   "power_log_wilson95": [
+    0.4522,
+    0.514
+   ],
+   "power_level": 0.383,
+   "ideal_alpha_over_8": 0.3481,
+   "bar": 0.2981,
+   "pass": true,
+   "power_log_raw_p_alpha_over_8": 0.472,
+   "power_log_raw_p_alpha_over_8_wilson95": [
+    0.4412,
+    0.503
+   ],
+   "other_region_flag_rate_log": 0.0163
+  },
+  {
+   "d": 4,
+   "n": 1000,
+   "power_log": 0.787,
+   "power_log_wilson95": [
+    0.7605,
+    0.8113
+   ],
+   "power_level": 0.668,
+   "ideal_alpha_over_8": 0.6472,
+   "bar": 0.5972,
+   "pass": true,
+   "power_log_raw_p_alpha_over_8": 0.77,
+   "power_log_raw_p_alpha_over_8_wilson95": [
+    0.7429,
+    0.795
+   ],
+   "other_region_flag_rate_log": 0.0197
+  },
+  {
+   "d": 5,
+   "n": 1000,
+   "power_log": 0.945,
+   "power_log_wilson95": [
+    0.9291,
+    0.9575
+   ],
+   "power_level": 0.891,
+   "ideal_alpha_over_8": 0.8684,
+   "bar": 0.8184,
+   "pass": true,
+   "power_log_raw_p_alpha_over_8": 0.943,
+   "power_log_raw_p_alpha_over_8_wilson95": [
+    0.9269,
+    0.9557
+   ],
+   "other_region_flag_rate_log": 0.0233
+  }
+ ],
+ "pass_3a": true,
+ "elapsed_s": 17.4
+}

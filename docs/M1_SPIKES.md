@@ -356,7 +356,23 @@ On the extended data, 3a would pass (0.16 / 0.43 / 0.79 / 0.95 against 0.12 / 0.
 - 1,000 seeds per d at d = 2, 3, 4, 5. Gate: log-scale BH power ≥ ideal single test at α/8 (averaged over the realized k) − 0.05 at every d. If any d fails, 3a is recorded as failed. One run, no rerun.
 - Reported only: a like-for-like check (the region's raw p < α/8), because the BH gate is lenient. The planted drop also moves the total and the channels, which loosens BH's threshold for the region.
 
-*Result: pending the run.*
+**Result (one run, 17 s; `results/d12_check.json`, which carries the commit and all three hashes): 3a PASSES at every d.**
+
+| d | log BH power [Wilson 95%] | ideal at α/8 | bar (ideal − 0.05) | pass | raw p < α/8 (reported only) | levels power (reported only) |
+|---|---|---|---|---|---|---|
+| 2 | 0.198 [0.175, 0.224] | 0.123 | 0.073 | ✓ | 0.180 | 0.152 |
+| 3 | 0.483 [0.452, 0.514] | 0.348 | 0.298 | ✓ | 0.472 | 0.383 |
+| 4 | 0.787 [0.761, 0.811] | 0.647 | 0.597 | ✓ | 0.770 | 0.668 |
+| 5 | 0.945 [0.929, 0.958] | 0.868 | 0.818 | ✓ | 0.943 | 0.891 |
+
+Non-planted regions were flagged at 1.1–2.3%. These numbers are close to the stream-7 numbers from `extended.py` (0.16 / 0.43 / 0.79 / 0.95).
+
+**How to read the pass: it shows the method isn't wasting power, not that it beats the ideal.** The like-for-like column (the region's raw p at α/8, the same threshold the ideal uses) is *above* the ideal by 0.06–0.12. No test can beat the ideal at the same α and the same effect, so the difference has to come from the effect size, not the test. d is measured in *level* residual SDs, but the test runs on *logs*. A drop of x% of the level is a log drop of −ln(1 − x), which is larger than x, and the region's SD is about 7% of its level, so the planted drops are 14–35%. *Diagnostic, after the run:* solving for the d at which the ideal test matches the raw-p rate gives 2.32 / 3.42 / 4.49 / 5.64, which is 12–16% above nominal. The pre-run review expected this bias to be a few percent; it is larger.
+
+So the honest summary is that log-level `baseline_compare` with BH performs about as well as an ideal single test would on the same effect. BH adds only 0.01–0.02 over the raw α/8 test. The gate, as D12 wrote it, passes with room to spare partly because its d unit is generous.
+
+**Proposed for the M3 calibration suite (needs your approval; not applied):** measure d for the D12 power gate in *log* residual SDs, estimated the same way, so the gate compares like with like. The ARCH §6 text says only "residual SDs", which leaves the scale open.
+
 
 ## S2L v2 results: NO MODEL PASSES
 
