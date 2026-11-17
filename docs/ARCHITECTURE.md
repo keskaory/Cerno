@@ -382,7 +382,7 @@ Every inferential output includes:
 - the effect in metric units, with an interval
 - the p-value and the adjusted q-value
 - `k`, the number of historical periods used
-- the MDE, when the result is inconclusive
+- the MDE at 80% power, on every `baseline_compare` result (D12); an inconclusive outcome states it in words
 - the `exploratory` flag
 - `interpretation_limits`
 
@@ -409,6 +409,7 @@ Seeds are fixed and recorded.
 - History length is drawn from 13–24 months per seed, so both short and long histories get calibrated.
 - `baseline_compare` and the full BH pipeline (several dimensions with overlapping segments) run on null seeds. The "any driver" rate and prediction-interval coverage must fall inside a binomial band around their nominal values.
 - An annual-seasonality scenario is reported but not asserted (see known limits).
+- **Power (D12):** in `null_flat`-shaped data with a planted regional drop, empirical power at d = 2, 3, 4 and 5 residual SDs must be at least the power of an ideal single prediction-interval test at α/m for the same mix of k, minus 0.05. This gate replaces the original "80% at d = 3", which no test can reach with 12–23 points. It runs nightly and at milestone sign-off, not per PR.
 - About 200 seeds run per PR, and 1,000 or more run nightly and at milestone sign-off.
 
 ## 7. Evidence, claims, VERIFY (C2)
