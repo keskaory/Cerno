@@ -11,7 +11,7 @@ On 2026-11-15 you approved M0–M1 and accepted D5 and D8. Later that day you se
 | D1 | Timeline and weekly hours | — | Sets milestone sizing and what gets cut |
 | D2 | App DB: SQLite on local disk vs. Postgres | **SQLite** (WAL), portable SQLAlchemy | After D9 there's no hosted DB to consider. SQLite is a file, needs no server, and costs nothing. |
 | D3 | Frontend: Vite React SPA served by FastAPI | **Vite SPA, same origin** | It also builds the static showcase for GitHub Pages (ARCH §8.1). Next.js was mainly a Vercel argument, and Vercel is out under D9. |
-| D4 | Which local model, at what settings | **Open: no model passed S2L v2** (2026-11-16). Guided mode is the default under the pre-registered rule. | Depends on D13. Results are in `M1_SPIKES.md` → M1 results. |
+| D4 | Which local model, at what settings | **Open: no model passed S2L v2 or v3** (2026-11-16). Guided mode is the v1 default and Full mode is experimental, as pre-registered. | v3 best: gemma3:12b RESOLVE 36/40 with 1 substitution, but 8/20 S6 and 369 s p50. Results: `M1_SPIKES.md` → S2L v3 results (on `m1-spikes`). Re-opening needs your approval: different hardware, a new model, or a narrower model role. |
 | D12 | Replace S7 criterion 3 (power ≥ 0.80 at d = 3) with efficiency against an ideal test plus MDE disclosure | Proposed at the M1 checkpoint | The original bar was unreachable with 12–23 monthly points and 8 tests (ideal single test 0.64–0.75). The original failure stays recorded either way. |
 | D6 | ~~Monthly API budget and daily cap~~ | **Superseded by D9** | There's no money to budget. Run limits are now LLM time (ARCH §5.3). |
 | D10 | Free hosted LLM tiers (e.g. free API keys from model vendors) as an optional provider | **No.** Local only. | They need sign-ups, change terms without notice, often train on your data, and break the "nothing leaves the machine" property. The provider interface keeps the option open if you ever want it. |
@@ -58,6 +58,8 @@ How it runs:
 - Before the full run: an independent review of the harness, then a hand-read smoke run on the *old* v2 questions. The smoke run scores nothing and can't touch the held-out set.
 
 If no model passes v3, Guided mode stays the default and Full mode stays experimental.
+
+**Outcome (2026-11-16):** no model passed v3. Guided mode stays the default.
 
 ### D11 `baseline_compare` fits log levels (accepted by you, 2026-11-16)
 Approved at the M1 checkpoint. It replaces "levels" in ADR-010 and ARCH §6.
