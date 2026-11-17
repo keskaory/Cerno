@@ -453,14 +453,14 @@ gemma3:12b reaches the RESOLVE accuracy bar exactly (Wilson 95% [0.77, 0.96]) bu
 
 ### What changed from v2, and what didn't
 
-- **RESOLVE improved a lot.** Best schema: 4b 1 → 23, qwen3:8b 22 → 32, 12b 2 → 36. `intent: "other"` dropped from 39–40 of 40 (Gemma, v2) to 1–5. So most of the v2 RESOLVE failure was my harness, as the v2 diagnostic suggested. The v2 numbers stay the v2 record.
-- **The remaining RESOLVE weakness is substitution.** Every model turns unsupported periods (half-years, whole years, quarters, "past two weeks") into concrete months: substitutions 7 / 5 / 1. Unsupported-period accuracy: 4b 0/4, qwen 0/4 (transcribe), 12b 3/4. This is the error that matters most for an analyst, since it answers a different question without saying so.
+- **RESOLVE improved a lot.** Best schema: 4b 1 → 23, qwen3:8b 22 → 32, 12b 2 → 36. `intent: "other"` dropped from 39–40 of 40 (Gemma, v2) to 1–5. So most of the v2 RESOLVE failure was my harness, as the v2 diagnostic suggested. Caveat: v3 uses a different question set, so the v2 → v3 change mixes the fix with any difference in question difficulty. The v2 numbers stay the v2 record.
+- **The remaining RESOLVE weakness is substitution**, mostly of periods. Every model turns some unsupported periods (half-years, whole years, quarters, "past two weeks") into concrete months. Substitutions 7 / 5 / 1 (best schema), by type: 4b 4 period + 3 metric (M02 and M04 → revenue, U07 → aov); qwen 4 period + 1 partial month (I03, "this month" → April); 12b 1 period (P04). Unsupported-period accuracy: 4b 0/4, qwen 0/4 (transcribe), 12b 3/4. This is the error that matters most for an analyst, since it answers a different question without saying so.
 - **PLAN and ASSESS were not changed in v3** and gave exactly the v2 validity counts for every model (temperature 0, seed 1). That's a replication of the v2 result, not new evidence.
-- **S6 improved but is far from 18/20.** Digits in first drafts went to 0 for every model (v2: 20 / 20 / 13), so the period-label fix worked. What's left are genuine rule breaches: segment names in template text (4b 41, 12b 50 errors), placeholders that don't match slots, causal words, `q` put in a slot, and dollar fields shown as percents.
+- **S6 improved for 4b (0 → 1) and qwen (0 → 4); 12b is unchanged at 8/20.** All are far from 18/20. v3 VERIFY is also slightly stricter than v2: `q` can no longer go in any slot (pre-run review item 2). Without that rule, 12b would complete 9 and qwen 6. Digits in first drafts went to 0 for every model (v2: 20 / 20 / 13), so the period-label fix worked. What's left are genuine rule breaches: segment names in template text (4b 41, 12b 50 errors), placeholders that don't match slots, causal words, `q` put in a slot, and dollar fields shown as percents.
 
 ### Measured separately
 
-**Structured output.** RESOLVE, PLAN and ASSESS: every call (420 across the three models) parsed and passed the schema on the first try. SYNTH: 6 calls hit `num_predict` = 1536 and were cut off (`truncated`): 4b 4, qwen3:8b 2, 12b 0. I read them: they're long but well-formed outputs that declare many unused slots, not loops. SYNTH outputs are longer in v3 (4b p50 992 output tokens vs 747) because claims now carry month slots. The budget is frozen and wasn't changed. The truncated scenarios couldn't change any verdict (4b would need 17 more completions, qwen 14).
+**Structured output.** RESOLVE, PLAN and ASSESS: every call (300 first calls, 335 attempts with semantic retries, across the three models) parsed and passed the schema on the first try. SYNTH: 6 calls hit `num_predict` = 1536 and were cut off (`truncated`): 4b 4, qwen3:8b 2, 12b 0. I read them: they're long but well-formed outputs that declare many unused slots, not loops. SYNTH outputs are longer in v3 (4b p50 992 output tokens vs 747) because claims now carry month slots. The budget is frozen and wasn't changed. The text before each cut already breaks SYNTH rules (a segment name written in text, `q` in a slot, a literal "%"). The truncated scenarios couldn't change any verdict (4b would need 17 more completions, qwen 14).
 
 | | 4b | qwen3:8b | 12b |
 |---|---|---|---|
@@ -488,11 +488,33 @@ gemma3:4b's transcribe schema is worse than its months schema: it wrote `same_mo
 
 qwen3:8b passed latency in v2 (178 s) and fails in v3 (216 s): its SYNTH calls got longer (p50 1,194 output tokens vs 843). v2 called its latency pass pessimistic because of the 1.0 repair rate; the repair rate did fall (0.85), but longer outputs outweighed it.
 
-**Memory** (num_ctx 8192): the same as v2. Share in VRAM 100% / 64% / 35%; GPU memory in use 4.4 / 4.7 / 4.7 GB; cold load 7.7 / 10.1 / 18.7 s. Free system RAM was 2.2–2.5 GB before loading. With gemma3:12b loaded it fell to 0.57 GB of 15 GB.
+**Memory** (num_ctx 8192): VRAM share and GPU memory match v2. Share in VRAM 100% / 64% / 35%; GPU memory in use 4.4 / 4.7 / 4.7 GB; cold load 7.7 / 10.1 / 18.7 s (12b was 21.3 s in v2). Free-RAM readings vary between runs (v2 0.9–2.8 GB before load), and the higher "after" readings for 4b and qwen (5.1 / 5.8 GB) probably reflect the previous model unloading, so treat them as rough. Free system RAM was 2.2–2.5 GB before loading. With gemma3:12b loaded it fell to 0.57 GB of 15 GB.
 
-**qwen3:8b with thinking on:** PLAN 4/10, ASSESS 8/10, S6 0/6; 26 `truncated` (PLAN 12, ASSESS 7, SYNTH 7) and 3 `semantic_error`. PLAN p50 95 s. As in v2, thinking made it slower and no better.
+**qwen3:8b with thinking on:** PLAN 4/10, ASSESS 8/10, S6 0/6; 26 `truncated` (PLAN 12, ASSESS 7, SYNTH 7) and 3 `semantic_error`. PLAN p50 95 s. The PLAN/ASSESS/S6 counts are identical to v2. Thinking made it slower, and worse on PLAN (4/10 vs 7/10 off). qwen's 138 min run time includes this pass.
 
-**VERIFY leniency noted before the run** (a literal `%` after a percent slot renders "%%"): 40 of 240 first-try templates for 4b, 22 of 249 for qwen3:8b, 0 for 12b. None of them was in a completed report, so it affected no outcome.
+**VERIFY leniency noted before the run** (a literal `%` after a percent slot renders "%%"): 20 of 121 first-try templates for 4b and 12 of 133 for qwen3:8b (40 of 240 and 22 of 249 counting repairs); 0 for 12b. None of them was in a completed report, so it affected no outcome.
+
+**A second VERIFY leniency, found by the results review.** The SYNTH rules say to use an `_abs` format after a direction word, but VERIFY only checks that the sign agrees. So a signed slot after "fell" passes and renders as a double negative, e.g. "Revenue fell by -$110,283". It's in completed reports: 12b a/0, a/1 and a/2, and qwen a/0. Read strictly, S6 would be 12b 5/20 and qwen 3/20. Like the "%%" gap it only flatters the models, and it changes no verdict. **"Completed" means "passed VERIFY", not "reads correctly".**
+
+**S6 VERIFY rejections by category** (all attempts, first try plus repair). A sample of about 15 was read by the reviewer; all were genuine breaches of rules stated in the prompt, and no new instrument defect was found:
+
+| Category | 4b | qwen3:8b | 12b |
+|---|---|---|---|
+| dollar field shown as percent | 63 | 49 | 0 |
+| placeholder/slot mismatch or stray brace (incl. `{x:fmt}` syntax) | 26 | 35 | 56 |
+| segment name in template text | 41 | 0 | 50 |
+| number field (incl. `q`) in a label or other disallowed slot | 6 | 39 | 39 |
+| direction word disagrees with sign | 20 | 13 | 10 |
+| causal wording or "significant" | 15 | 25 | 13 |
+| bad reference | 12 | 2 | 0 |
+| driver wording without q < 0.05 | 7 | 1 | 0 |
+| share of change on offsetting movements | 4 | 8 | 4 |
+| percent field shown as dollars | 2 | 0 | 0 |
+| planted segment not covered | 2 | 0 | 0 |
+
+**RESOLVE errors that aren't substitutions:** invented years (12b D02 → 2023; qwen Y01, Y05); comparison and baseline reversed (12b Y03); months off by one (qwen months R02, R05); out-of-range months answered as `unsupported_period` (I02, I04, several models; still a refusal); unknown metrics answered as `needs_metric` or `invalid`; and 4b transcribe's `same_month_last_year` baseline (34 of 40). Sensitivity: U03 (12b) and U06 (qwen) gave `intent: "other"` with `unknown_metric`, which resolves to `invalid`. That's wrong under the stated rule but still a refusal. Crediting them gives 12b 37/40 and qwen 33/40, with the same substitutions, so no gate changes.
+
+**Raw evidence.** `out/v3/` (raw model text) is gitignored, as in v2. The public `results/v3/` files carry every score, but the hand reads above (truncations, rejection samples) can only be re-checked on this machine.
 
 ### What this means
 

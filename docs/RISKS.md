@@ -17,11 +17,11 @@ Status: **v2.0 draft** (2026-11-15). v1.1 came from the architecture review. v2.
 | R11 | Results aren't reproducible (hash flakes) | Med | Med | unvalidated |
 | R12 | Windows dev vs. Linux prod differences waste days | Med | Low | decision pending (D5) |
 | R13 | The structured-output schema is too large or slow for typed steps with dynamic enums | Low | Med | **measured** (S2L): schemas up to 42 enum values parsed 100% with thinking off |
-| R14 | No local model that fits 6 GB of VRAM is good enough for PLAN and SYNTHESIZE | **High** | High | **occurred** (S2L v2: no model passes); Guided mode is the default |
-| R15 | Local inference is too slow for a good live demo or an affordable-in-time benchmark | High | Med | **measured**: only gemma3:4b and qwen3:8b fit 180 s; 12b projects 444 s |
+| R14 | No local model that fits 6 GB of VRAM is good enough for PLAN and SYNTHESIZE | **High** | High | **occurred** (S2L v2 and v3: no model passes); Guided mode is the default |
+| R15 | Local inference is too slow for a good live demo or an affordable-in-time benchmark | High | Med | **measured**: v3 only gemma3:4b fits 180 s (77 s); qwen3:8b 216 s, 12b 369 s |
 | R16 | Grammar-constrained output parses, but its content is wrong (ignored schema keywords, plausible but wrong enums) | High | Med | **confirmed** (S2L): 420/420 parsed, every failure semantic |
 | R17 | Results depend on one machine's hardware and drivers, so others can't reproduce them | Med | Med | assumed mitigated |
-| R18 | Our own benchmark harness mis-measures (prompt or VERIFY defects), so scores reflect the harness, not the model | **High** | High | **occurred twice** in M1 (see below) |
+| R18 | Our own benchmark harness mis-measures (prompt or VERIFY defects), so scores reflect the harness, not the model | **High** | High | **occurred** in v1 and v2; v3 found only two lenient VERIFY gaps (see below) |
 
 ### R1 — Logically wrong SQL
 - **Why it matters:** a wrong number looks exactly like a right one.
@@ -96,6 +96,7 @@ There's no hosted service. The static showcase is files on GitHub Pages, and the
   - Strength, outcome and coverage come from code.
   - VERIFY is deterministic.
 - **Validate:** S2L and S6.
+- **Measured (S2L v2 and v3, 2026-11-16): occurred.** No model passed either run. With the harness fixed (v3), the best RESOLVE score was 36/40 (gemma3:12b), and every model still substituted concrete months for some unsupported periods. The best S6 result was 8/20 completed, against 18 needed. Guided mode is the v1 default.
 - **Model doesn't follow the schema's intent** (seen in the probe: filling `month` and `months_ago` together): use one-of unions so there's exactly one way to say each thing.
 - **Fallback:** Guided mode (ARCH §5.5): the full playbook, code-written prose, and the same numbers and evidence, with the limitation stated in the README. That's an honest fallback, not a workaround.
 
@@ -106,6 +107,7 @@ There's no hosted service. The static showcase is files on GitHub Pages, and the
   - `gemma3:12b`: 37% on the GPU, about 7.5 tok/s and about 14 s per call.
 - **Mitigation:** small outputs, thinking off, a single GPU queue, one run at a time, and the model kept loaded between calls (`keep_alive`).
 - **Validate:** S2L's projected time per investigation, then S2b on the skeleton.
+- **Measured (S2L v3):** projected time per investigation p50 77 s (4b), 216 s (qwen3:8b), 369 s (12b), against 180 s. Only gemma3:4b fits, and it's the least accurate.
 - **Fallback:** a smaller model for RESOLVE only, or fewer ASSESS rounds.
 
 ### R16 — Constrained decoding isn't validation (new)
@@ -129,6 +131,8 @@ It happened twice in M1:
 - a smoke run of 3–5 items per stage on one model, whose outputs are read by hand before the full run (it scores nothing, so it can't bias thresholds)
 - a held-out question set for any harness revision written after seeing results
 - every prompt names every enum value it expects
+
+**Applied to v3 (2026-11-16):** pre-run review (6 fixes), freeze with hashes, and a smoke run read by hand that found no defect. The post-run review then found two VERIFY gaps that are too *lenient*: a literal "%" after a percent slot, and signed values after "fell" ("fell by -$110,283"). Neither changed a verdict, but they show that a pre-run review mostly catches harness defects that make scores *too low*. Leniency shows up only when someone reads the outputs that passed.
 
 **What's left:** a harness can still be wrong in ways nobody thought to check. Raw outputs are kept (`spikes/*/out/`, gitignored) so the scoring can always be audited.
 

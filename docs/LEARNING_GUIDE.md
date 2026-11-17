@@ -204,12 +204,19 @@ Code: `spikes/s2l_models/` (`resolve.py`, `plan.py`, `synth.py`, `client.py`, `r
 - **Guided mode passed VERIFY 20/20.** It's the default for v1, as the pre-registered rule says when no model passes.
 - **"Thinking" made qwen3 slower and no better.** Its reasoning text used up the output budget, and 21 calls were cut off.
 
+**v3: fixing the harness, then testing on new questions.** You approved a v3 (D13) that fixed only the defects and used 40 new held-out questions. It followed the same steps: the harness was frozen with hashes, reviewed before running, and smoke-tested on a few *old* questions read by hand. Then the full run went ahead. **No model passed again**, so Guided mode stays the default.
+- RESOLVE jumped (12b from 2 to 36 of 40), so most of v2's RESOLVE failure really was the harness.
+- What's left is the dangerous kind of error: a **substitution**. Asked "why did revenue grow in 2026 compared with 2025?", gemma3:12b answered about January 2026 vs January 2025. An analyst that quietly answers a different question is worse than one that refuses.
+- PLAN/ASSESS gave exactly the v2 counts, because those prompts didn't change and the settings are deterministic. A re-run of identical inputs is a replication, not new evidence.
+- "Completed" in S6 means "passed VERIFY", not "reads well". The results review found that VERIFY lets "fell by -$110,283" through. A check only proves what it checks.
+
 **Check yourself:**
 1. Why does valid JSON from constrained decoding still need Pydantic validation?
 2. Give two reasons the model transcribes periods instead of computing dates.
 3. What breaks if a test suite calls the real model instead of `ScriptedProvider`?
 4. The diagnostic re-score (ignoring `intent`) puts gemma3:12b at 36/40. Why isn't that a pass, and what would a fair re-test need?
 5. Why was it right to stop the v1 run before reading its outputs, but wrong to fix the prompt and re-run the same 40 questions after reading v2's?
+6. gemma3:12b scored 36/40 on v3 but failed RESOLVE. Why does one substitution fail the gate when four plain wrong answers don't?
 
 ---
 

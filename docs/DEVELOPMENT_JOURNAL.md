@@ -272,3 +272,13 @@ Smoke run (gemma3:4b, v2 questions C01, R05, U01, P02, plan contexts 0 and 6, sy
 - One leniency in VERIFY, present in v2 too: a template can write a literal `%` after a percent slot ("{share}%"), which renders as "%%". It can only make a model look better, it doesn't put a number in model text, and changing VERIFY now would need another review. So I left it, and I'll count those templates in the results.
 
 No change forced; the full run uses the frozen `ebf15a3` harness.
+
+## 2026-11-16: S2L v3 results. No model passes; Guided mode stays the default
+
+The full v3 run took about 4.5 h on the frozen harness (`ebf15a3`). Results: `M1_SPIKES.md` → S2L v3 results; commit `4308045`.
+- **RESOLVE:** 4b 23/40, qwen3:8b 32/40, 12b 36/40. Every model still substituted (7 / 5 / 1), so none passes. 12b's one substitution was "2026 compared with 2025", answered as January vs January.
+- **PLAN/ASSESS:** exactly the v2 counts. Those prompts didn't change, so this is a replication.
+- **Latency:** only 4b fits (77 s p50). qwen3:8b went from 178 s to 216 s because its SYNTH outputs got longer.
+- **S6:** 1 / 4 / 8 of 20 completed. The digit problem is gone; what's left are genuine rule breaches.
+
+What I learned: fixing the harness was worth it. RESOLVE went from near zero to near the bar, so the v2 numbers mostly measured my prompt. But the real model weakness underneath is substitution, and that's the one that matters for an analyst. The independent results review (`reviews/2026-11-16-s2l-v3-results-review.md`) changed no verdict. It found a second lenient VERIFY gap ("fell by -$110,283" passes), corrected several numbers I'd copied or mislabelled (the "420 calls" came from v2), and asked for the full failure breakdown, which is now in the write-up. Both lenient gaps only flatter the models. A pre-run review mostly catches defects that push scores down; leniency only shows up when you read the outputs that passed.
