@@ -432,3 +432,68 @@ None of these defects affects the latency verdict for gemma3:12b (302 s at p50 e
 ### What would be needed to re-test (needs your approval)
 
 A v3 harness that fixes only these three defects and the gap (name `explain_change` in the rule text; add a period-label evidence field; drop `number` or label each field's unit; match `signific*`), plus **a new, held-out set of 40 questions written and frozen before any run**. The current 40 have now shaped a fix, so re-using them would overstate accuracy. Thresholds unchanged. Expected cost: about 4.5 hours of local compute, $0. Even if v3 passed on quality, only qwen3:8b is near the latency bar, at 178 s p50 with a repair rate of 1.0.
+
+## S2L v3 results: NO MODEL PASSES
+
+Run under D13. Harness frozen at `ebf15a3` before any v3 call; every results file carries the same six hashes (`questions_v3.json` `71cd4ccb`, `run.py` `089afaec`, full hashes in the journal). Held-out set `questions_v3.json`: 40 new questions over contexts D, E and F, same categories and counts as v2. Same models, digests, settings and thresholds as v2. Results: `spikes/s2l_models/results/v3/`. Run time: 24 min (4b), 138 min (qwen3:8b), 110 min (12b).
+
+### Gate results
+
+| Criterion | gemma3:4b | qwen3:8b | gemma3:12b |
+|---|---|---|---|
+| 1. RESOLVE ≥ 36/40, 0 substitutions | ✗ 23/40, 7 subst. (months) | ✗ 32/40, 5 subst. (transcribe) | ✗ **36/40, 1 subst.** (transcribe) |
+| 2. PLAN 10/10 and ASSESS 10/10 | ✗ 0/10, 10/10 | ✗ 7/10, 9/10 | ✗ 8/10, 6/10 |
+| 3. latency p50 ≤ 180 s, p90 ≤ 300 s | ✓ 77 / 95 s | ✗ 216 / 298 s | ✗ 369 / 551 s |
+| 4. S6 | ✗ 1/20 completed | ✗ 4/20 | ✗ 8/20 |
+| Guided mode VERIFY | 20/20 | 20/20 | 20/20 |
+
+**Guided mode stays the v1 default and Full mode stays experimental** (D13, ARCH §5.5).
+
+gemma3:12b reaches the RESOLVE accuracy bar exactly (Wilson 95% [0.77, 0.96]) but fails it on one substitution: P04, "Why did revenue grow in 2026 compared with 2025?", became January 2026 vs January 2025. It also fails criteria 2, 3 and 4, so the substitution doesn't decide anything.
+
+### What changed from v2, and what didn't
+
+- **RESOLVE improved a lot.** Best schema: 4b 1 → 23, qwen3:8b 22 → 32, 12b 2 → 36. `intent: "other"` dropped from 39–40 of 40 (Gemma, v2) to 1–5. So most of the v2 RESOLVE failure was my harness, as the v2 diagnostic suggested. The v2 numbers stay the v2 record.
+- **The remaining RESOLVE weakness is substitution.** Every model turns unsupported periods (half-years, whole years, quarters, "past two weeks") into concrete months: substitutions 7 / 5 / 1. Unsupported-period accuracy: 4b 0/4, qwen 0/4 (transcribe), 12b 3/4. This is the error that matters most for an analyst, since it answers a different question without saying so.
+- **PLAN and ASSESS were not changed in v3** and gave exactly the v2 validity counts for every model (temperature 0, seed 1). That's a replication of the v2 result, not new evidence.
+- **S6 improved but is far from 18/20.** Digits in first drafts went to 0 for every model (v2: 20 / 20 / 13), so the period-label fix worked. What's left are genuine rule breaches: segment names in template text (4b 41, 12b 50 errors), placeholders that don't match slots, causal words, `q` put in a slot, and dollar fields shown as percents.
+
+### Measured separately
+
+**Structured output.** RESOLVE, PLAN and ASSESS: every call (420 across the three models) parsed and passed the schema on the first try. SYNTH: 6 calls hit `num_predict` = 1536 and were cut off (`truncated`): 4b 4, qwen3:8b 2, 12b 0. I read them: they're long but well-formed outputs that declare many unused slots, not loops. SYNTH outputs are longer in v3 (4b p50 992 output tokens vs 747) because claims now carry month slots. The budget is frozen and wasn't changed. The truncated scenarios couldn't change any verdict (4b would need 17 more completions, qwen 14).
+
+| | 4b | qwen3:8b | 12b |
+|---|---|---|---|
+| RESOLVE months / transcribe | 23 / 15 | 27 / 32 | 34 / 36 |
+| substitutions months / transcribe | 7 / 9 | 3 / 5 | 2 / 1 |
+| `intent: "other"` (of 40), months / transcribe | 1 / 1 | 5 / 4 | 3 / 5 |
+| PLAN semantic retries; final valid | 10; 0 | 3; 7 | 7; 8 |
+| ASSESS semantic retries; final valid | 7; 10 | 1; 9 | 4; 6 |
+| S6: completed / repaired / planted covered | 1 / 0 / 0 of 0 | 4 / 2 / 2 of 2 | 8 / 2 / 4 of 4 |
+| S6: null driver claims before → after VERIFY | 4 → 0 | 0 → 0 | 0 → 0 |
+| S6: drafts with digits before VERIFY | 0 | 0 | 0 |
+| S6: repair rate | 0.85 | 0.85 | 0.70 |
+
+gemma3:4b's transcribe schema is worse than its months schema: it wrote `same_month_last_year` as the baseline for most questions, including ones that name the baseline month.
+
+**Latency** (p50 per call):
+
+| Stage | 4b | qwen3:8b | 12b |
+|---|---|---|---|
+| RESOLVE (best schema) | 3.2 s | 6.9 s | 10.4 s |
+| PLAN | 14.0 s | 14.4 s | 79.1 s |
+| ASSESS | 11.6 s | 7.0 s | 41.5 s |
+| SYNTH | 21.6 s | 101.3 s | 121.7 s |
+| decode tok/s | 48–55 | 12–16 | 6–8 |
+
+qwen3:8b passed latency in v2 (178 s) and fails in v3 (216 s): its SYNTH calls got longer (p50 1,194 output tokens vs 843). v2 called its latency pass pessimistic because of the 1.0 repair rate; the repair rate did fall (0.85), but longer outputs outweighed it.
+
+**Memory** (num_ctx 8192): the same as v2. Share in VRAM 100% / 64% / 35%; GPU memory in use 4.4 / 4.7 / 4.7 GB; cold load 7.7 / 10.1 / 18.7 s. Free system RAM was 2.2–2.5 GB before loading. With gemma3:12b loaded it fell to 0.57 GB of 15 GB.
+
+**qwen3:8b with thinking on:** PLAN 4/10, ASSESS 8/10, S6 0/6; 26 `truncated` (PLAN 12, ASSESS 7, SYNTH 7) and 3 `semantic_error`. PLAN p50 95 s. As in v2, thinking made it slower and no better.
+
+**VERIFY leniency noted before the run** (a literal `%` after a percent slot renders "%%"): 40 of 240 first-try templates for 4b, 22 of 249 for qwen3:8b, 0 for 12b. None of them was in a completed report, so it affected no outcome.
+
+### What this means
+
+With the harness defects removed, no free local model that fits this laptop passes. gemma3:12b is accurate enough on RESOLVE apart from one substitution, but it's too slow (35% in VRAM) and completes only 8 of 20 reports. gemma3:4b is fast but wrong too often. qwen3:8b sits in between and now fails all four criteria. The pre-registered outcome holds: Guided mode is the default.

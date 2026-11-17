@@ -1,0 +1,5516 @@
+{
+ "env": {
+  "model": "gemma3:12b",
+  "digest": "b92b218582c521ba287f38f1d6057dcd3c6cbff036f13cac97b5d861f5e58ec3",
+  "quantization": "Q4_K_M",
+  "parameter_size": "11.8B",
+  "remote_host": null,
+  "ollama_version": "0.40.16",
+  "cold_load_s": 18.71,
+  "load_duration_s": 15.18,
+  "size_gb": 8.97,
+  "vram_gb": 3.18,
+  "vram_fraction": 0.354,
+  "free_ram_gb_before": 2.39,
+  "free_ram_gb_after": 0.57,
+  "gpu_mem_used_mb": 4679,
+  "nvidia_driver": "617.14",
+  "settings": {
+   "temperature": 0,
+   "seed": 1,
+   "num_ctx": 8192
+  },
+  "keep_alive": "30m",
+  "num_predict": {
+   "resolve": 256,
+   "plan": 768,
+   "assess": 768,
+   "synth": 1536
+  },
+  "think": false,
+  "frozen_hashes": {
+   "questions_v3.json": "71cd4ccb2da1bb0e",
+   "resolve.py": "8d5d47d0c84d84eb",
+   "plan.py": "d5c44696128d40fa",
+   "synth.py": "c7f840b2fe103286",
+   "client.py": "531e720e41154d17",
+   "run.py": "089afaec8bf34d36"
+  },
+  "memory_after_run": {
+   "gpu_mem_used_mb": 4736,
+   "free_ram_gb": 2.66
+  }
+ },
+ "resolve": {
+  "months": {
+   "correct": 34,
+   "n": 40,
+   "wilson95": [
+    0.709,
+    0.929
+   ],
+   "substitutions": 2,
+   "by_category": {
+    "clear": "5/5",
+    "relative": "4/5",
+    "date_boundary": "4/5",
+    "year_transition": "5/5",
+    "ambiguous": "4/4",
+    "unknown_metric": "8/8",
+    "unsupported_period": "2/4",
+    "invalid": "2/4"
+   },
+   "structured": {
+    "calls": 40,
+    "parsed_json_first_try": 40,
+    "schema_valid_first_try": 40,
+    "valid_after_retry": 40,
+    "retried": 2
+   },
+   "failures": {
+    "semantic_error": 2
+   },
+   "timing": {
+    "p50_s": 8.42,
+    "p90_s": 9.56,
+    "max_s": 16.54,
+    "prompt_tokens_p50": 344,
+    "out_tokens_p50": 39,
+    "prompt_tok_s_p50": 207.7,
+    "decode_tok_s_p50": 8.4
+   },
+   "wrong": [
+    {
+     "id": "R02",
+     "cat": "relative",
+     "result": {
+      "status": "unsupported_period"
+     },
+     "correct": false,
+     "substitution": false,
+     "raw": {
+      "intent": "explain_change",
+      "metric": "orders_count",
+      "comparison_month": "unsupported",
+      "baseline_month": "previous"
+     }
+    },
+    {
+     "id": "D02",
+     "cat": "date_boundary",
+     "result": {
+      "status": "ok",
+      "metric": "revenue",
+      "comparison": "2023-08",
+      "baseline": "2023-07"
+     },
+     "correct": false,
+     "substitution": false,
+     "raw": {
+      "intent": "explain_change",
+      "metric": "revenue",
+      "comparison_month": "2023-08",
+      "baseline_month": "previous"
+     }
+    },
+    {
+     "id": "P01",
+     "cat": "unsupported_period",
+     "result": {
+      "status": "ok",
+      "metric": "revenue",
+      "comparison": "2026-07",
+      "baseline": "2026-01"
+     },
+     "correct": false,
+     "substitution": true,
+     "raw": {
+      "intent": "explain_change",
+      "metric": "revenue",
+      "comparison_month": "2026-07",
+      "baseline_month": "2026-01"
+     }
+    },
+    {
+     "id": "P04",
+     "cat": "unsupported_period",
+     "result": {
+      "status": "ok",
+      "metric": "revenue",
+      "comparison": "2026-12",
+      "baseline": "2025-12"
+     },
+     "correct": false,
+     "substitution": true,
+     "raw": {
+      "intent": "explain_change",
+      "metric": "revenue",
+      "comparison_month": "2026-12",
+      "baseline_month": "2025-12"
+     }
+    },
+    {
+     "id": "I02",
+     "cat": "invalid",
+     "result": {
+      "status": "unsupported_period"
+     },
+     "correct": false,
+     "substitution": false,
+     "raw": {
+      "intent": "explain_change",
+      "metric": "revenue",
+      "comparison_month": "unsupported",
+      "baseline_month": "previous"
+     }
+    },
+    {
+     "id": "I04",
+     "cat": "invalid",
+     "result": {
+      "status": "unsupported_period"
+     },
+     "correct": false,
+     "substitution": false,
+     "raw": {
+      "intent": "explain_change",
+      "metric": "aov",
+      "comparison_month": "unsupported",
+      "baseline_month": "unsupported"
+     }
+    }
+   ]
+  },
+  "transcribe": {
+   "correct": 36,
+   "n": 40,
+   "wilson95": [
+    0.769,
+    0.96
+   ],
+   "substitutions": 1,
+   "by_category": {
+    "clear": "5/5",
+    "relative": "5/5",
+    "date_boundary": "4/5",
+    "year_transition": "4/5",
+    "ambiguous": "4/4",
+    "unknown_metric": "7/8",
+    "unsupported_period": "3/4",
+    "invalid": "4/4"
+   },
+   "structured": {
+    "calls": 40,
+    "parsed_json_first_try": 40,
+    "schema_valid_first_try": 40,
+    "valid_after_retry": 40,
+    "retried": 0
+   },
+   "failures": {},
+   "timing": {
+    "p50_s": 10.4,
+    "p90_s": 16.87,
+    "max_s": 17.18,
+    "prompt_tokens_p50": 413,
+    "out_tokens_p50": 54,
+    "prompt_tok_s_p50": 245.0,
+    "decode_tok_s_p50": 8.1
+   },
+   "wrong": [
+    {
+     "id": "D02",
+     "cat": "date_boundary",
+     "result": {
+      "status": "ok",
+      "metric": "revenue",
+      "comparison": "2023-08",
+      "baseline": "2023-07"
+     },
+     "correct": false,
+     "substitution": false,
+     "raw": {
+      "intent": "explain_change",
+      "metric": "revenue",
+      "comparison": {
+       "kind": "named_month",
+       "month": 8,
+       "year": 2023
+      },
+      "baseline": {
+       "kind": "previous_month"
+      }
+     }
+    },
+    {
+     "id": "Y03",
+     "cat": "year_transition",
+     "result": {
+      "status": "ok",
+      "metric": "aov",
+      "comparison": "2024-12",
+      "baseline": "2025-01"
+     },
+     "correct": false,
+     "substitution": false,
+     "raw": {
+      "intent": "explain_change",
+      "metric": "aov",
+      "comparison": {
+       "kind": "named_month",
+       "month": 12,
+       "year": 2024
+      },
+      "baseline": {
+       "kind": "named_month",
+       "month": 1,
+       "year": 2025
+      }
+     }
+    },
+    {
+     "id": "U03",
+     "cat": "unknown_metric",
+     "result": {
+      "status": "invalid"
+     },
+     "correct": false,
+     "substitution": false,
+     "raw": {
+      "intent": "other",
+      "metric": "unknown_metric",
+      "comparison": {
+       "kind": "named_month",
+       "month": 3,
+       "year": 2026
+      },
+      "baseline": {
+       "kind": "previous_month"
+      }
+     }
+    },
+    {
+     "id": "P04",
+     "cat": "unsupported_period",
+     "result": {
+      "status": "ok",
+      "metric": "revenue",
+      "comparison": "2026-01",
+      "baseline": "2025-01"
+     },
+     "correct": false,
+     "substitution": true,
+     "raw": {
+      "intent": "explain_change",
+      "metric": "revenue",
+      "comparison": {
+       "kind": "named_month",
+       "month": 1,
+       "year": 2026
+      },
+      "baseline": {
+       "kind": "named_month",
+       "month": 1,
+       "year": 2025
+      }
+     }
+    }
+   ]
+  },
+  "best_schema": "transcribe"
+ },
+ "plan_assess": {
+  "plan": {
+   "valid": 8,
+   "n": 10,
+   "structured": {
+    "calls": 10,
+    "parsed_json_first_try": 10,
+    "schema_valid_first_try": 10,
+    "valid_after_retry": 8,
+    "retried": 7
+   },
+   "failures": {
+    "semantic_error": 9
+   },
+   "timing": {
+    "p50_s": 79.07,
+    "p90_s": 89.96,
+    "max_s": 92.89,
+    "prompt_tokens_p50": 664,
+    "out_tokens_p50": 264,
+    "prompt_tok_s_p50": 327.2,
+    "decode_tok_s_p50": 6.7
+   },
+   "items": [
+    {
+     "ctx": "shop_small_v0",
+     "enum_values": 16,
+     "ok": true,
+     "parsed": {
+      "dimension_order": [
+       "region",
+       "channel"
+      ],
+      "crosstab": null,
+      "extras": [
+       {
+        "kind": "crosstab",
+        "metric": "orders_count",
+        "dimension_a": "region",
+        "dimension_b": "channel",
+        "reason": "Revenue change is significant in North region. Examining orders_count by region and channel might reveal if a specific channel in North is driving the decline."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "aov",
+        "dimension_a": "region",
+        "dimension_b": "channel",
+        "reason": "AOV changes can indicate shifts in customer behavior or product mix.  Cross-tabbing with region and channel can highlight if a specific segment is experiencing a disproportionate AOV change."
+       }
+      ]
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_small_v1",
+     "enum_values": 16,
+     "ok": true,
+     "parsed": {
+      "dimension_order": [
+       "channel",
+       "region"
+      ],
+      "crosstab": null,
+      "extras": [
+       {
+        "kind": "crosstab",
+        "metric": "orders_count",
+        "dimension_a": "region",
+        "dimension_b": "channel",
+        "reason": "Revenue change is likely driven by a combination of regional and channel performance. Examining orders count by region and channel can reveal if order volume shifts correlate with revenue changes."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "aov",
+        "dimension_a": "region",
+        "dimension_b": "channel",
+        "reason": "AOV changes can explain some of the revenue difference.  AOV by region and channel can highlight if changes in average order value are contributing to the revenue decline."
+       }
+      ]
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_mid_v0",
+     "enum_values": 24,
+     "ok": false,
+     "parsed": null,
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_mid_v1",
+     "enum_values": 24,
+     "ok": true,
+     "parsed": {
+      "dimension_order": [
+       "channel",
+       "category",
+       "region"
+      ],
+      "crosstab": null,
+      "extras": [
+       {
+        "kind": "crosstab",
+        "metric": "orders_count",
+        "dimension_a": "category",
+        "dimension_b": "channel",
+        "reason": "Category performance varies significantly by channel (toys and grocery show positive change via store channel). A cross-tab could reveal if this is a consistent pattern or specific to a few categories"
+       },
+       {
+        "kind": "crosstab",
+        "metric": "orders_count",
+        "dimension_a": "region",
+        "dimension_b": "category",
+        "reason": "Regional performance differs. A cross-tab could reveal if certain categories are driving the change in specific regions."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "orders_count",
+        "dimension_a": "channel",
+        "dimension_b": "region",
+        "reason": "Channel performance varies by region. A cross-tab could reveal if the app channel decline is concentrated in a specific region."
+       }
+      ]
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_aov_v0",
+     "enum_values": 23,
+     "ok": true,
+     "parsed": {
+      "dimension_order": [
+       "region",
+       "category"
+      ],
+      "crosstab": null,
+      "extras": [
+       {
+        "kind": "crosstab",
+        "metric": "aov",
+        "dimension_a": "region",
+        "dimension_b": "category",
+        "reason": "While the playbook already decomposes by dimension, a crosstab can reveal combinations of region and category that are driving the overall change.  This can help prioritize investigation."
+       }
+      ]
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_aov_v1",
+     "enum_values": 23,
+     "ok": false,
+     "parsed": null,
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_big_v0",
+     "enum_values": 42,
+     "ok": true,
+     "parsed": {
+      "dimension_order": [
+       "category",
+       "region",
+       "device",
+       "channel"
+      ],
+      "crosstab": null,
+      "extras": [
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "category",
+        "dimension_b": "region",
+        "reason": "Category performance varies by region. A change in regional preferences or marketing efforts could be driving the revenue decline."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "device",
+        "dimension_b": "region",
+        "reason": "Device usage patterns differ by region. A change in device preference or accessibility could be impacting revenue."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "channel",
+        "dimension_b": "region",
+        "reason": "Channel performance can vary significantly by region. A change in channel preference or marketing efforts could be driving the revenue decline."
+       }
+      ]
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_big_v1",
+     "enum_values": 42,
+     "ok": true,
+     "parsed": {
+      "dimension_order": [
+       "channel",
+       "category",
+       "region",
+       "device"
+      ],
+      "crosstab": null,
+      "extras": [
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "channel",
+        "dimension_b": "category",
+        "reason": "Interaction between channel and category could reveal specific product or channel performance issues."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "region",
+        "dimension_b": "device",
+        "reason": "Revenue changes might be localized to specific regions and devices, revealing regional or device-specific issues."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "category",
+        "dimension_b": "device",
+        "reason": "Device usage patterns may vary by category, and a revenue drop could be concentrated in one category for a specific device."
+       }
+      ]
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_big2_v0",
+     "enum_values": 42,
+     "ok": true,
+     "parsed": {
+      "dimension_order": [
+       "region",
+       "tier",
+       "country"
+      ],
+      "crosstab": null,
+      "extras": [
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "region",
+        "dimension_b": "tier",
+        "reason": "Understanding the interaction between region and tier could reveal if the decline is concentrated in specific customer segments."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "region",
+        "dimension_b": "country",
+        "reason": "Regional performance can be influenced by country-specific factors. This cross-tab might highlight a localized issue."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "tier",
+        "dimension_b": "country",
+        "reason": "Changes in customer behavior might be more pronounced in certain countries for new vs. returning customers."
+       }
+      ]
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_big2_v1",
+     "enum_values": 42,
+     "ok": true,
+     "parsed": {
+      "dimension_order": [
+       "tier",
+       "region",
+       "country"
+      ],
+      "crosstab": null,
+      "extras": [
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "region",
+        "dimension_b": "tier",
+        "reason": "The large negative change in 'tier' suggests a potential interaction with 'region'. This cross-tab could reveal if the impact is concentrated in specific regions."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "country",
+        "dimension_b": "region",
+        "reason": "To understand the regional impact, a cross-tab of country and region might reveal if the change is localized to specific country-region combinations."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "tier",
+        "dimension_b": "country",
+        "reason": "Investigate if the 'tier' impact is consistent across countries or if certain countries are disproportionately affected."
+       }
+      ]
+     },
+     "hot_segment": "North"
+    }
+   ]
+  },
+  "assess": {
+   "valid": 6,
+   "n": 10,
+   "structured": {
+    "calls": 10,
+    "parsed_json_first_try": 10,
+    "schema_valid_first_try": 10,
+    "valid_after_retry": 6,
+    "retried": 4
+   },
+   "failures": {
+    "semantic_error": 8
+   },
+   "timing": {
+    "p50_s": 41.5,
+    "p90_s": 75.34,
+    "max_s": 75.46,
+    "prompt_tokens_p50": 705,
+    "out_tokens_p50": 226,
+    "prompt_tok_s_p50": 301.1,
+    "decode_tok_s_p50": 6.6
+   },
+   "items": [
+    {
+     "ctx": "shop_small_v0",
+     "enum_values": 16,
+     "ok": false,
+     "parsed": null,
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_small_v1",
+     "enum_values": 16,
+     "ok": false,
+     "parsed": null,
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_mid_v0",
+     "enum_values": 24,
+     "ok": true,
+     "parsed": {
+      "action": "add_steps",
+      "steps": [
+       {
+        "kind": "crosstab",
+        "metric": "orders_count",
+        "dimension_a": "region",
+        "dimension_b": "category",
+        "reason": "Investigate the interaction between region and category to see if specific regional categories are driving the overall trend. The category results show significant variation, and region also has some,"
+       }
+      ],
+      "reason": "The category dimension shows the most significant deviations and the interaction between region and category might reveal underlying patterns."
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_mid_v1",
+     "enum_values": 24,
+     "ok": true,
+     "parsed": {
+      "action": "add_steps",
+      "steps": [
+       {
+        "kind": "crosstab",
+        "metric": "orders_count",
+        "dimension_a": "region",
+        "dimension_b": "category",
+        "reason": "Investigate the interaction between region and category to see if certain categories are driving the unexpected behavior in specific regions. This could reveal localized issues."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "orders_count",
+        "dimension_a": "channel",
+        "dimension_b": "category",
+        "reason": "Similar to above, explore the interaction between channel and category.  Perhaps a specific category is performing poorly on a particular channel."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "orders_count",
+        "dimension_a": "region",
+        "dimension_b": "channel",
+        "reason": "Check if the channel mix is different between regions, which could explain the regional variations."
+       }
+      ],
+      "reason": "The baseline comparison shows significant variations across regions, channels, and categories. Cross-tabulations will help understand the interplay between these dimensions and identify root causes."
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_aov_v0",
+     "enum_values": 23,
+     "ok": false,
+     "parsed": null,
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_aov_v1",
+     "enum_values": 23,
+     "ok": false,
+     "parsed": null,
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_big_v0",
+     "enum_values": 42,
+     "ok": true,
+     "parsed": {
+      "action": "add_steps",
+      "steps": [
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "category",
+        "dimension_b": "channel",
+        "reason": "Category and channel interactions might reveal specific combinations driving the observed revenue shifts.  The playbook likely looked at these dimensions individually, but not in combination."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "region",
+        "dimension_b": "device",
+        "reason": "Understanding how regional performance varies by device could highlight device-specific issues or opportunities. The playbook likely looked at these dimensions individually, but not in combination."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "category",
+        "dimension_b": "device",
+        "reason": "Device usage patterns differ by category. This cross-tab could reveal if certain categories are underperforming on specific devices."
+       }
+      ],
+      "reason": "Several categories (electronics, toys, grocery) and regions (North) show significant unexpected percentage changes with low p-values. Cross-tabulating dimensions could reveal interaction effects not  "
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_big_v1",
+     "enum_values": 42,
+     "ok": true,
+     "parsed": {
+      "action": "add_steps",
+      "steps": [
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "channel",
+        "dimension_b": "category",
+        "reason": "Investigate channel performance across categories to see if specific category/channel combinations are driving the unexpected results. This could reveal if a particular channel is underperforming in a"
+       },
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "region",
+        "dimension_b": "device",
+        "reason": "Explore regional device usage to see if device-specific trends are masking regional performance. For example, mobile usage might be different in the West."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "revenue",
+        "dimension_a": "category",
+        "dimension_b": "region",
+        "reason": "Understand if certain categories are performing unexpectedly in specific regions. This could highlight localized issues or opportunities."
+       }
+      ],
+      "reason": "The unexpected results are widespread across dimensions. Cross-tabulations will help identify interaction effects between dimensions that might explain the overall trend."
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_big2_v0",
+     "enum_values": 42,
+     "ok": true,
+     "parsed": {
+      "action": "add_steps",
+      "steps": [
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "tier",
+        "dimension_b": "country",
+        "reason": "Investigate the interaction between tier and country to see if specific tier/country combinations are driving the observed changes."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "tier",
+        "dimension_b": "region",
+        "reason": "Similar to above, check for tier/region interactions."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "country",
+        "dimension_b": "region",
+        "reason": "Explore the relationship between country and region to see if regional patterns are influencing country-level results."
+       }
+      ],
+      "reason": "While we've examined each dimension individually, we haven't explored interactions between them. Significant changes might be masked by looking at dimensions in isolation."
+     },
+     "hot_segment": "North"
+    },
+    {
+     "ctx": "shop_big2_v1",
+     "enum_values": 42,
+     "ok": true,
+     "parsed": {
+      "action": "add_steps",
+      "steps": [
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "tier",
+        "dimension_b": "country",
+        "reason": "Investigate the interaction between tier and country to see if specific country/tier combinations are driving the unexpected changes. The playbook only looked at these dimensions independently."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "region",
+        "dimension_b": "tier",
+        "reason": "Similar to above, explore the interaction between region and tier to identify if certain regional tiers are experiencing unusual behavior."
+       },
+       {
+        "kind": "crosstab",
+        "metric": "active_customers",
+        "dimension_a": "region",
+        "dimension_b": "country",
+        "reason": "Check for regional country combinations that are driving the unexpected changes. The playbook only looked at these dimensions independently."
+       }
+      ],
+      "reason": "The playbook examined each dimension independently. Cross-tabulations will help identify if interactions between dimensions are contributing to the observed changes."
+     },
+     "hot_segment": "North"
+    }
+   ]
+  }
+ },
+ "synth": {
+  "completed": 8,
+  "n": 20,
+  "repaired": 2,
+  "repair_rate": 0.7,
+  "null_driver_claims_pre_verify": 0,
+  "null_driver_claims_after_verify": 0,
+  "planted_covered": "4/4",
+  "digits_pre_verify": 0,
+  "digits_in_completed": 0,
+  "invalid_ref_errors_first_try": 0,
+  "claims_first_try": 139,
+  "structured": {
+   "calls": 34,
+   "parsed_json_first_try": 34,
+   "schema_valid_first_try": 34,
+   "valid_after_retry": 34,
+   "retried": 0
+  },
+  "failures": {},
+  "timing": {
+   "p50_s": 121.68,
+   "p90_s": 182.39,
+   "max_s": 233.74,
+   "prompt_tokens_p50": 2336,
+   "out_tokens_p50": 670,
+   "prompt_tok_s_p50": 322.7,
+   "decode_tok_s_p50": 6.0
+  },
+  "reports": [
+   {
+    "scenario": "a",
+    "seed": 0,
+    "status": "completed",
+    "attempts": [
+     {
+      "errors": [],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The overall change was unexpected by {unexpected}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {delta} representing {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=North].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The {segment} region's change was unexpected by {unexpected_pct}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_base_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_region.rows[segment=North].unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue through the {segment} channel fell by {delta} representing {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The {segment} channel's change was unexpected by {unexpected_pct}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_base_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_channel.rows[segment=web].unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Movements in the {segment} region offset each other.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    "repaired": false,
+    "rendered": [
+     "Revenue fell by -$110,283 in October 2025 compared with September 2025.",
+     "The overall change was unexpected by $99,255.",
+     "Revenue in the North region fell by $106,213 representing 96.3% of the total change.",
+     "The North region's change was unexpected by -25.7%.",
+     "Revenue through the web channel fell by $54,052 representing 49.0% of the total change.",
+     "The web channel's change was unexpected by -7.4%.",
+     "Movements in the South region offset each other."
+    ],
+    "covers_planted": true
+   },
+   {
+    "scenario": "a",
+    "seed": 1,
+    "status": "completed",
+    "attempts": [
+     {
+      "errors": [],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta_pct} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The overall change was {unexpected} which was {unexpected_pct}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region rose by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in revenue across regions largely offset each other.",
+         "slots": []
+        },
+        {
+         "template": "Revenue through the {segment} channel fell by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue through the {segment} channel fell by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=app].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_channel.rows[segment=app].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    "repaired": false,
+    "rendered": [
+     "Revenue fell by -7.0% in October 2025 compared with September 2025.",
+     "The overall change was $55,276 which was -6.3%.",
+     "Revenue in the South region fell by $62,016.",
+     "Revenue in the North region rose by $2,787.",
+     "The movements in revenue across regions largely offset each other.",
+     "Revenue through the web channel fell by $34,862.",
+     "Revenue through the app channel fell by $16,651."
+    ],
+    "covers_planted": true
+   },
+   {
+    "scenario": "a",
+    "seed": 2,
+    "status": "completed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 2: segment names must come from label slots, not template text",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 4: segment names must come from label slots, not template text",
+       "claim 5: segment names must come from label slots, not template text",
+       "claim 6: segment names must come from label slots, not template text"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta_pct} in {comparison_period} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The overall change was {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the East region fell by {east_delta} ({share_of_change}).",
+         "slots": [
+          {
+           "name": "east_delta",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=East].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The East region's change was {unexpected_pct} beyond normal variation.",
+         "slots": [
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_region.rows[segment=East].unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the North region fell by {north_delta}.",
+         "slots": [
+          {
+           "name": "north_delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the South region fell by {south_delta}.",
+         "slots": [
+          {
+           "name": "south_delta",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the West region rose by {west_delta}.",
+         "slots": [
+          {
+           "name": "west_delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta_pct} in {comparison_period} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The overall change was {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {north_segment} region fell by {north_delta} ({share_of_change}).",
+         "slots": [
+          {
+           "name": "north_segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "north_delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=North].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The {east_segment}'s change was {unexpected_pct} beyond normal variation.",
+         "slots": [
+          {
+           "name": "east_segment",
+           "ref": "ev_base_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_region.rows[segment=East].unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {south_segment} region fell by {south_delta}.",
+         "slots": [
+          {
+           "name": "south_segment",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "south_delta",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {west_segment} region rose by {west_delta}.",
+         "slots": [
+          {
+           "name": "west_segment",
+           "ref": "ev_dec_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "west_delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    "repaired": true,
+    "rendered": [
+     "Revenue fell by -8.0% in October 2025 compared with September 2025.",
+     "The overall change was $99,177 (7.2%).",
+     "Revenue in the North region fell by $7,310 (6.6%).",
+     "The East's change was -27.9% beyond normal variation.",
+     "Revenue in the South region fell by $5,702.",
+     "Revenue in the West region rose by $3,687."
+    ],
+    "covers_planted": true
+   },
+   {
+    "scenario": "a",
+    "seed": 3,
+    "status": "completed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 2: segment names must come from label slots, not template text",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 4: segment names must come from label slots, not template text",
+       "claim 5: segment names must come from label slots, not template text",
+       "claim 6: segment names must come from label slots, not template text"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta} in {month} compared with {baseline_month}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money_abs"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_month",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, revenue fell by {unexpected} with a {unexpected_pct} change.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The West region saw a decline of {west_delta}, representing {west_share} of the total change.",
+         "slots": [
+          {
+           "name": "west_delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "west_share",
+           "ref": "ev_dec_region.rows[segment=West].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the West region fell by {west_unexpected_pct}.",
+         "slots": [
+          {
+           "name": "west_unexpected_pct",
+           "ref": "ev_base_region.rows[segment=West].unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "Web sales fell by {web_delta}, accounting for {web_share} of the total change.",
+         "slots": [
+          {
+           "name": "web_delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "web_share",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Web sales fell by {web_unexpected_pct}.",
+         "slots": [
+          {
+           "name": "web_unexpected_pct",
+           "ref": "ev_base_channel.rows[segment=web].unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "Movements in the North, South, and East regions largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     },
+     {
+      "errors": [],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta} in {month} compared with {baseline_month}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money_abs"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_month",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, revenue fell by {unexpected} with a {unexpected_pct} change.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The {west_region} region saw a decline of {west_delta}, representing {west_share} of the total change.",
+         "slots": [
+          {
+           "name": "west_region",
+           "ref": "ev_dec_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "west_delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "west_share",
+           "ref": "ev_dec_region.rows[segment=West].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {west_region} region fell by {west_unexpected_pct}.",
+         "slots": [
+          {
+           "name": "west_region",
+           "ref": "ev_base_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "west_unexpected_pct",
+           "ref": "ev_base_region.rows[segment=West].unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "{web_channel} sales fell by {web_delta}, accounting for {web_share} of the total change.",
+         "slots": [
+          {
+           "name": "web_channel",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "web_delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "web_share",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "{web_channel} sales fell by {web_unexpected_pct}.",
+         "slots": [
+          {
+           "name": "web_channel",
+           "ref": "ev_base_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "web_unexpected_pct",
+           "ref": "ev_base_channel.rows[segment=web].unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "Movements in the {north_region}, {south_region}, and {east_region} regions largely offset each other.",
+         "slots": [
+          {
+           "name": "north_region",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "south_region",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "east_region",
+           "ref": "ev_dec_region.rows[segment=East].segment",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    "repaired": true,
+    "rendered": [
+     "Revenue fell by $45,560 in October 2025 compared with September 2025.",
+     "Overall, revenue fell by $41,004 with a 4.3% change.",
+     "The West region saw a decline of $46,254, representing 101.5% of the total change.",
+     "Revenue in the West region fell by 23.3%.",
+     "web sales fell by $25,285, accounting for 55.5% of the total change.",
+     "web sales fell by 4.8%.",
+     "Movements in the North, South, and East regions largely offset each other."
+    ],
+    "covers_planted": true
+   },
+   {
+    "scenario": "a",
+    "seed": 4,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 1: q cannot be shown as label",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 3: q cannot be shown as label",
+       "claim 5: segment names must come from label slots, not template text",
+       "claim 5: q cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money_abs"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The unexpected change in revenue was {unexpected} with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_total.q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {delta} representing {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=North].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The North region's revenue change was unexpected, with a q of {q}.",
+         "slots": [
+          {
+           "name": "q",
+           "ref": "ev_base_region.rows[segment=North].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue through the {segment} channel fell by {delta}, accounting for {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The web channel's revenue change was unexpected, with a q of {q}.",
+         "slots": [
+          {
+           "name": "q",
+           "ref": "ev_base_channel.rows[segment=web].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Movements in revenue across regions largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 1: q cannot be shown as label",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 3: q cannot be shown as label",
+       "claim 5: segment names must come from label slots, not template text",
+       "claim 5: q cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money_abs"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The unexpected change in revenue was {unexpected}, with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_total.q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {delta}, representing {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=North].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The North region's revenue change was unexpected, with a q of {q}.",
+         "slots": [
+          {
+           "name": "q",
+           "ref": "ev_base_region.rows[segment=North].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue through the {segment} channel fell by {delta}, accounting for {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The web channel's revenue change was unexpected, with a q of {q}.",
+         "slots": [
+          {
+           "name": "q",
+           "ref": "ev_base_channel.rows[segment=web].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Movements in revenue across regions largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "a",
+    "seed": 5,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 1: q cannot be shown as label",
+       "claim 2: segment names must come from label slots, not template text",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 3: q cannot be shown as label",
+       "claim 4: segment names must come from label slots, not template text",
+       "claim 5: segment names must come from label slots, not template text",
+       "claim 5: q cannot be shown as label",
+       "claim 6: segment names must come from label slots, not template text"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta_pct} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The unexpected change in revenue totaled {unexpected} with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_total.q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the South region fell by {south_delta_abs} with a share of change of {south_share}.",
+         "slots": [
+          {
+           "name": "south_delta_abs",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "south_share",
+           "ref": "ev_dec_region.rows[segment=South].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The South region's unexpected change in revenue had a q of {south_q}.",
+         "slots": [
+          {
+           "name": "south_q",
+           "ref": "ev_base_region.rows[segment=South].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the North region rose by {north_delta_abs}.",
+         "slots": [
+          {
+           "name": "north_delta_abs",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The North region's unexpected change in revenue had a q of {north_q}.",
+         "slots": [
+          {
+           "name": "north_q",
+           "ref": "ev_base_region.rows[segment=North].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "The web channel saw a decrease in revenue of {web_delta_abs}.",
+         "slots": [
+          {
+           "name": "web_delta_abs",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 1: q cannot be shown as label",
+       "claim 2: segment names must come from label slots, not template text",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 3: q cannot be shown as label",
+       "claim 4: segment names must come from label slots, not template text",
+       "claim 5: segment names must come from label slots, not template text",
+       "claim 5: q cannot be shown as label",
+       "claim 6: segment names must come from label slots, not template text"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta_pct} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The unexpected change in revenue totaled {unexpected} with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_total.q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the South segment fell by {south_delta_abs} with a share of change of {south_share}.",
+         "slots": [
+          {
+           "name": "south_delta_abs",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "south_share",
+           "ref": "ev_dec_region.rows[segment=South].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The South segment's unexpected change in revenue had a q of {south_q}.",
+         "slots": [
+          {
+           "name": "south_q",
+           "ref": "ev_base_region.rows[segment=South].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the North segment rose by {north_delta_abs}.",
+         "slots": [
+          {
+           "name": "north_delta_abs",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The North segment's unexpected change in revenue had a q of {north_q}.",
+         "slots": [
+          {
+           "name": "north_q",
+           "ref": "ev_base_region.rows[segment=North].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "The web channel saw a decrease in revenue of {web_delta_abs}.",
+         "slots": [
+          {
+           "name": "web_delta_abs",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "a",
+    "seed": 6,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "headline: placeholders [] must match slot names ['delta', 'month']",
+       "headline: stray brace; placeholders look like {name}",
+       "claim 1: placeholders [] must match slot names ['unexpected', 'unexpected_pct']",
+       "claim 1: stray brace; placeholders look like {name}",
+       "claim 2: placeholders [] must match slot names ['east_delta', 'east_share']",
+       "claim 2: stray brace; placeholders look like {name}",
+       "claim 2: segment names must come from label slots, not template text",
+       "claim 3: placeholders [] must match slot names ['west_delta']",
+       "claim 3: stray brace; placeholders look like {name}",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 4: placeholders [] must match slot names ['web_delta', 'web_share']",
+       "claim 4: stray brace; placeholders look like {name}",
+       "claim 4: segment names must come from label slots, not template text",
+       "claim 5: placeholders [] must match slot names ['app_delta']",
+       "claim 5: stray brace; placeholders look like {name}",
+       "claim 5: segment names must come from label slots, not template text"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta:money_abs} in {month:label}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money_abs"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, revenue fell by {unexpected:money_abs}, a {unexpected_pct:pct_abs} change.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The East region saw a decline of {east_delta:money_abs}, representing {east_share:pct} of the total change.",
+         "slots": [
+          {
+           "name": "east_delta",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "east_share",
+           "ref": "ev_dec_region.rows[segment=East].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The West region's revenue fell by {west_delta:money_abs}.",
+         "slots": [
+          {
+           "name": "west_delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue from the web channel fell by {web_delta:money_abs}, accounting for {web_share:pct} of the total change.",
+         "slots": [
+          {
+           "name": "web_delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "web_share",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue from the app channel fell by {app_delta:money_abs}.",
+         "slots": [
+          {
+           "name": "app_delta",
+           "ref": "ev_dec_channel.rows[segment=app].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Movements in revenue across regions largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "headline: placeholders [] must match slot names ['delta', 'month']",
+       "headline: stray brace; placeholders look like {name}",
+       "claim 1: placeholders [] must match slot names ['unexpected', 'unexpected_pct']",
+       "claim 1: stray brace; placeholders look like {name}",
+       "claim 2: placeholders [] must match slot names ['east_delta', 'east_share']",
+       "claim 2: stray brace; placeholders look like {name}",
+       "claim 2: segment names must come from label slots, not template text",
+       "claim 3: placeholders [] must match slot names ['west_delta']",
+       "claim 3: stray brace; placeholders look like {name}",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 4: placeholders [] must match slot names ['web_delta', 'web_share']",
+       "claim 4: stray brace; placeholders look like {name}",
+       "claim 4: segment names must come from label slots, not template text",
+       "claim 5: placeholders [] must match slot names ['app_delta']",
+       "claim 5: stray brace; placeholders look like {name}",
+       "claim 5: segment names must come from label slots, not template text"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue fell by {delta:money_abs} in {month:label}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money_abs"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, revenue fell by {unexpected:money_abs}, a {unexpected_pct:pct_abs} change.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The East region saw a decline of {east_delta:money_abs}, representing {east_share:pct} of the total change.",
+         "slots": [
+          {
+           "name": "east_delta",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "east_share",
+           "ref": "ev_dec_region.rows[segment=East].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The West region's revenue fell by {west_delta:money_abs}.",
+         "slots": [
+          {
+           "name": "west_delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue from the web channel fell by {web_delta:money_abs}, accounting for {web_share:pct} of the total change.",
+         "slots": [
+          {
+           "name": "web_delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "web_share",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue from the app channel fell by {app_delta:money_abs}.",
+         "slots": [
+          {
+           "name": "app_delta",
+           "ref": "ev_dec_channel.rows[segment=app].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Movements in revenue across regions largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 10,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 2: q cannot be shown as label",
+       "claim 4: q cannot be shown as label",
+       "claim 6: q cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value fell by {delta_pct} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, average order value fell by {money_abs} from {baseline_value} to {comparison_value}.",
+         "slots": [
+          {
+           "name": "money_abs",
+           "ref": "ev_total.delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "baseline_value",
+           "ref": "ev_total.baseline_value",
+           "fmt": "money"
+          },
+          {
+           "name": "comparison_value",
+           "ref": "ev_total.comparison_value",
+           "fmt": "money"
+          }
+         ]
+        },
+        {
+         "template": "The change was {unexpected_pct} unexpected, with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_total.q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In the {segment} region, the total effect was {total_effect}, with a rate effect of {rate_effect} and a mix effect of {mix_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=East].total_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=East].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=East].mix_effect",
+           "fmt": "money"
+          }
+         ]
+        },
+        {
+         "template": "The {segment} region showed a q of {q}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_base_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_region.rows[segment=East].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Movements in {segment1}, {segment2}, and {segment3} largely offset each other.",
+         "slots": [
+          {
+           "name": "segment1",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "segment2",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "segment3",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "The {segment} channel showed a q of {q}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_base_channel.rows[segment=app].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_channel.rows[segment=app].q",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 3: placeholders ['mix_effect', 'rate_effect', 'total_effect'] must match slot names ['segment', 'total_effect', 'rate_effect', 'mix_effect']",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 4: placeholders ['q'] must match slot names ['segment', 'q']",
+       "claim 4: segment names must come from label slots, not template text",
+       "claim 4: q cannot be shown as label",
+       "claim 5: placeholders [] must match slot names ['segment1', 'segment2', 'segment3']",
+       "claim 5: segment names must come from label slots, not template text",
+       "claim 6: placeholders ['q'] must match slot names ['segment', 'q']",
+       "claim 6: segment names must come from label slots, not template text",
+       "claim 6: q cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value fell by {delta_pct} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, average order value fell by {money_abs} from {baseline_value} to {comparison_value}.",
+         "slots": [
+          {
+           "name": "money_abs",
+           "ref": "ev_total.delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "baseline_value",
+           "ref": "ev_total.baseline_value",
+           "fmt": "money"
+          },
+          {
+           "name": "comparison_value",
+           "ref": "ev_total.comparison_value",
+           "fmt": "money"
+          }
+         ]
+        },
+        {
+         "template": "The change was {unexpected_pct} unexpected.",
+         "slots": [
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "In the East region, the total effect was {total_effect}, with a rate effect of {rate_effect} and a mix effect of {mix_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=East].total_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=East].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=East].mix_effect",
+           "fmt": "money"
+          }
+         ]
+        },
+        {
+         "template": "The East region had a q of {q}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_base_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_region.rows[segment=East].q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Movements in North, South, and West largely offset each other.",
+         "slots": [
+          {
+           "name": "segment1",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "segment2",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "segment3",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "The app channel had a q of {q}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_base_channel.rows[segment=app].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_channel.rows[segment=app].q",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 11,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 2: segment names must come from label slots, not template text",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 4: segment names must come from label slots, not template text",
+       "claim 5: segment names must come from label slots, not template text"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value fell by {delta_pct} between {baseline_period} and {comparison_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, average order value fell by {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The West segment saw a total effect of {total_effect} on average order value.",
+         "slots": [
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=West].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The North segment saw a total effect of {total_effect} on average order value.",
+         "slots": [
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=North].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The East segment saw a total effect of {total_effect} on average order value.",
+         "slots": [
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=East].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The South segment saw a total effect of {total_effect} on average order value.",
+         "slots": [
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=South].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in average order value across segments largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 2: segment names must come from label slots, not template text",
+       "claim 3: segment names must come from label slots, not template text",
+       "claim 4: segment names must come from label slots, not template text",
+       "claim 5: segment names must come from label slots, not template text"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value fell by {delta_pct} between {baseline_period} and {comparison_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, average order value fell by {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The West segment saw a total effect of {total_effect} on average order value.",
+         "slots": [
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=West].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The North segment saw a total effect of {total_effect} on average order value.",
+         "slots": [
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=North].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The East segment saw a total effect of {total_effect} on average order value.",
+         "slots": [
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=East].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The South segment saw a total effect of {total_effect} on average order value.",
+         "slots": [
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=South].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in average order value across segments largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 12,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 2: q cannot be shown as label",
+       "claim 6: segment names must come from label slots, not template text",
+       "claim 6: q cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value rose by {delta} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, AOV increased by {delta_pct}.",
+         "slots": [
+          {
+           "name": "delta_pct",
+           "ref": "ev_total.delta_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The unexpected change in AOV was {unexpected} with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_total.q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In the {segment} region, AOV rose by {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=North].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In the {segment} region, AOV fell by {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=South].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in AOV across regions largely offset each other.",
+         "slots": []
+        },
+        {
+         "template": "The North region showed an unexpected change in AOV of {unexpected_pct} with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_region.rows[segment=North].unexpected_pct",
+           "fmt": "pct"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_region.rows[segment=North].q",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 2: q cannot be shown as label",
+       "claim 6: segment names must come from label slots, not template text",
+       "claim 6: q cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value rose by {delta} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, AOV increased by {delta_pct}.",
+         "slots": [
+          {
+           "name": "delta_pct",
+           "ref": "ev_total.delta_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "The unexpected change in AOV was {unexpected}, with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_total.q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In the {segment} region, AOV rose by {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=North].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In the {segment} region, AOV fell by {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=South].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in AOV across regions largely offset each other.",
+         "slots": []
+        },
+        {
+         "template": "The North region showed an unexpected change in AOV of {unexpected_pct} with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_region.rows[segment=North].unexpected_pct",
+           "fmt": "pct"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_region.rows[segment=North].q",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 13,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 3: causal wording is not allowed",
+       "claim 4: says down/decrease but ev_mix_region.rows[segment=South].total_effect is positive",
+       "claim 4: causal wording is not allowed",
+       "claim 5: says up/increase but ev_mix_region.rows[segment=East].rate_effect is negative",
+       "claim 5: says down/decrease but ev_mix_region.rows[segment=East].mix_effect is positive",
+       "claim 5: causal wording is not allowed",
+       "claim 6: says up/increase but ev_mix_region.rows[segment=West].rate_effect is negative",
+       "claim 6: causal wording is not allowed"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value rose by {delta} ({delta_pct}) in {comparison_period} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, the change in AOV was {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The change in AOV was primarily driven by {segment}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} due to rate effects and fell by {mix_effect} due to mix effects, for a total effect of {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=North].rate_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=North].mix_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=North].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} due to rate effects and fell by {mix_effect} due to mix effects, for a total effect of {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=South].rate_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=South].mix_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=South].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} due to rate effects and fell by {mix_effect} due to mix effects, for a total effect of {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=East].rate_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=East].mix_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=East].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} due to rate effects and fell by {mix_effect} due to mix effects, for a total effect of {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=West].rate_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=West].mix_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=West].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 3: causal wording is not allowed",
+       "claim 4: causal wording is not allowed",
+       "claim 5: causal wording is not allowed",
+       "claim 6: causal wording is not allowed"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value rose by {delta} ({delta_pct}) in {comparison_period} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, the change in AOV was {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The change in AOV was primarily influenced by {segment}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV saw a {rate_effect} change due to rate effects and a {mix_effect} change due to mix effects, resulting in a total effect of {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=North].rate_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=North].mix_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=North].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV saw a {rate_effect} change due to rate effects and a {mix_effect} change due to mix effects, resulting in a total effect of {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=South].rate_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=South].mix_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=South].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV saw a {rate_effect} change due to rate effects and a {mix_effect} change due to mix effects, resulting in a total effect of {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=East].rate_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=East].mix_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=East].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV saw a {rate_effect} change due to rate effects and a {mix_effect} change due to mix effects, resulting in a total effect of {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=West].rate_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=West].mix_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=West].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 14,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 3: causal wording is not allowed",
+       "claim 4: causal wording is not allowed",
+       "claim 5: says down/decrease but ev_mix_region.rows[segment=West].mix_effect is positive"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value rose by {delta} ({delta_pct}) in {comparison_period} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, the change in AOV was {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The change in AOV was primarily driven by {segment}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} due to rate effects and {mix_effect} due to mix effects.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=North].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=North].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} due to rate effects and {mix_effect} due to mix effects.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=South].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=South].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV fell by {total_effect}, with rate effects of {rate_effect} and mix effects of {mix_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=West].total_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=West].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=West].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in AOV across {segment} largely offset each other.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 5: says down/decrease but ev_mix_region.rows[segment=West].mix_effect is positive"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value rose by {delta} ({delta_pct}) in {comparison_period} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, the change in AOV was {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The change in AOV was primarily driven by {segment}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} ({mix_effect}).",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=North].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=North].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} ({mix_effect}).",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=South].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=South].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV fell by {total_effect}, with rate effects of {rate_effect} and mix effects of {mix_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=West].total_effect",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=West].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=West].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in AOV across {segment} largely offset each other.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 15,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 3: says up/increase but ev_mix_region.rows[segment=North].rate_effect is negative",
+       "claim 3: causal wording is not allowed",
+       "claim 4: says down/decrease but ev_mix_region.rows[segment=South].mix_effect is positive",
+       "claim 4: causal wording is not allowed",
+       "claim 6: causal wording is not allowed"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value rose by {delta} in {month}, compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, AOV rose by {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The change in AOV was primarily driven by {segment}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} due to a change in rate, and {mix_effect} due to a change in mix.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=North].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=North].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV fell by {rate_effect} due to a change in rate, and {mix_effect} due to a change in mix.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=South].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=South].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in AOV across {segment} largely offset each other.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} due to a change in rate, and {mix_effect} due to a change in mix.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=West].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=West].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 3: says down/decrease but ev_mix_region.rows[segment=North].mix_effect is positive",
+       "claim 4: says down/decrease but ev_mix_region.rows[segment=South].mix_effect is positive"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value rose by {delta} in {month}, compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, AOV rose by {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "The change in AOV was primarily influenced by {segment}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV fell by {rate_effect} ({mix_effect}).",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=North].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=North].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV fell by {rate_effect} ({mix_effect}).",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=South].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=South].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in AOV across {segment} largely offset each other.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=East].segment",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In {segment}, AOV rose by {rate_effect} ({mix_effect}).",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "rate_effect",
+           "ref": "ev_mix_region.rows[segment=West].rate_effect",
+           "fmt": "money"
+          },
+          {
+           "name": "mix_effect",
+           "ref": "ev_mix_region.rows[segment=West].mix_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 16,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 2: q cannot be shown as label",
+       "claim 6: segment names must come from label slots, not template text",
+       "claim 6: q cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value fell by {delta_pct} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, AOV decreased by {money_abs} from {baseline_value} to {comparison_value}.",
+         "slots": [
+          {
+           "name": "money_abs",
+           "ref": "ev_total.delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "baseline_value",
+           "ref": "ev_total.baseline_value",
+           "fmt": "money"
+          },
+          {
+           "name": "comparison_value",
+           "ref": "ev_total.comparison_value",
+           "fmt": "money"
+          }
+         ]
+        },
+        {
+         "template": "The unexpected change in AOV overall was {unexpected} with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_total.q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In the {segment} region, AOV rose by {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=North].total_effect",
+           "fmt": "money"
+          }
+         ]
+        },
+        {
+         "template": "In the {segment} region, AOV fell by {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=South].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in AOV across regions largely offset each other.",
+         "slots": []
+        },
+        {
+         "template": "The North region showed an unexpected change in AOV of {unexpected_pct} with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_region.rows[segment=North].unexpected_pct",
+           "fmt": "pct"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_region.rows[segment=North].q",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 2: q cannot be shown as label",
+       "claim 6: segment names must come from label slots, not template text",
+       "claim 6: q cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Average order value fell by {delta_pct} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, AOV decreased by {money_abs} from {baseline_value} to {comparison_value}.",
+         "slots": [
+          {
+           "name": "money_abs",
+           "ref": "ev_total.delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "baseline_value",
+           "ref": "ev_total.baseline_value",
+           "fmt": "money"
+          },
+          {
+           "name": "comparison_value",
+           "ref": "ev_total.comparison_value",
+           "fmt": "money"
+          }
+         ]
+        },
+        {
+         "template": "The unexpected change in AOV overall was {unexpected}, with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_total.q",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "In the {segment} region, AOV rose by {total_effect}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect",
+           "ref": "ev_mix_region.rows[segment=North].total_effect",
+           "fmt": "money"
+          }
+         ]
+        },
+        {
+         "template": "In the {segment} region, AOV fell by {total_effect_abs}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_mix_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "total_effect_abs",
+           "ref": "ev_mix_region.rows[segment=South].total_effect",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in AOV across regions largely offset each other.",
+         "slots": []
+        },
+        {
+         "template": "The North region showed an unexpected change in AOV of {unexpected_pct}, with a q of {q}.",
+         "slots": [
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_region.rows[segment=North].unexpected_pct",
+           "fmt": "pct"
+          },
+          {
+           "name": "q",
+           "ref": "ev_base_region.rows[segment=North].q",
+           "fmt": "label"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "c",
+    "seed": 20,
+    "status": "completed",
+    "attempts": [
+     {
+      "errors": [],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue rose by {delta_pct} in {comparison_period} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, revenue increased by {delta} in {comparison_period}.",
+         "slots": [
+          {
+           "name": "delta",
+           "ref": "ev_total.delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "comparison_period",
+           "ref": "ev_total.comparison_period",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "The increase in revenue was partially attributable to the {segment} region, which saw a rise of {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The {segment} region also contributed to the increase, with revenue rising by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region increased by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "However, revenue in the {segment} region fell by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in revenue across regions largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     }
+    ],
+    "repaired": false,
+    "rendered": [
+     "Revenue rose by 1.4% in October 2025 compared with September 2025.",
+     "Overall, revenue increased by $18,874 in October 2025.",
+     "The increase in revenue was partially attributable to the North region, which saw a rise of $6,005.",
+     "The South region also contributed to the increase, with revenue rising by $7,160.",
+     "Revenue in the East region increased by $10,871.",
+     "However, revenue in the West region fell by $5,162.",
+     "The movements in revenue across regions largely offset each other."
+    ],
+    "covers_planted": null
+   },
+   {
+    "scenario": "c",
+    "seed": 21,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "claim 2: movements in ev_dec_region offset each other; say so instead of a share",
+       "claim 3: movements in ev_dec_region offset each other; say so instead of a share",
+       "claim 4: movements in ev_dec_region offset each other; say so instead of a share",
+       "claim 5: movements in ev_dec_region offset each other; say so instead of a share"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue rose by {delta} in {month}, compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, the unexpected change in revenue was {unexpected}, representing {unexpected_pct} of the total change.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region rose by {delta}, representing {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=North].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region rose by {delta}, representing {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=South].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {drop}, representing {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "drop",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=East].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {drop}, representing {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "drop",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=West].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue through the {segment} channel fell by {drop}, representing {share_of_change} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "drop",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "claim 2: segment names must come from label slots, not template text",
+       "claim 3: segment names must come from label slots, not template text"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue rose by {delta} in {month}, compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, the unexpected change in revenue was {unexpected}, representing {unexpected_pct} of the total change.",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the North and South regions rose, while revenue in the East and West regions fell. The movements in these regions largely offset each other.",
+         "slots": []
+        },
+        {
+         "template": "Revenue through the web and app channels fell, while revenue through the store channel saw a slight decrease. The movements in these channels largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "c",
+    "seed": 22,
+    "status": "failed",
+    "attempts": [
+     {
+      "errors": [
+       "headline: placeholders ['direction'] must match slot names ['direction', 'delta_pct', 'month', 'comparison_period']",
+       "headline: stray brace; placeholders look like {name}",
+       "headline: delta cannot be shown as label",
+       "claim 1: placeholders ['direction'] must match slot names ['direction', 'unexpected', 'month']",
+       "claim 1: stray brace; placeholders look like {name}",
+       "claim 1: unexpected cannot be shown as label",
+       "claim 2: placeholders ['direction'] must match slot names ['segment', 'direction', 'delta', 'share_of_change']",
+       "claim 2: stray brace; placeholders look like {name}",
+       "claim 2: delta cannot be shown as label",
+       "claim 3: placeholders ['direction'] must match slot names ['segment', 'direction', 'delta', 'share_of_change']",
+       "claim 3: stray brace; placeholders look like {name}",
+       "claim 3: delta cannot be shown as label",
+       "claim 4: placeholders ['direction'] must match slot names ['segment', 'direction', 'delta', 'share_of_change']",
+       "claim 4: stray brace; placeholders look like {name}",
+       "claim 4: delta cannot be shown as label",
+       "claim 5: placeholders ['direction'] must match slot names ['segment', 'direction', 'delta', 'share_of_change']",
+       "claim 5: stray brace; placeholders look like {name}",
+       "claim 5: delta cannot be shown as label",
+       "claim 6: placeholders ['direction'] must match slot names ['segment', 'direction', 'delta', 'share_of_change']",
+       "claim 6: stray brace; placeholders look like {name}",
+       "claim 6: delta cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue {direction} by {delta_pct:pct} in {month:label} compared with {comparison_period:label}.",
+        "slots": [
+         {
+          "name": "direction",
+          "ref": "ev_total.delta",
+          "fmt": "label"
+         },
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall revenue {direction} by {unexpected:money_abs} in {month:label}.",
+         "slots": [
+          {
+           "name": "direction",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "label"
+          },
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "month",
+           "ref": "ev_total.comparison_period",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment:label} region {direction} by {delta:money_abs}, representing {share_of_change:pct} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "direction",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=North].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment:label} region {direction} by {delta:money_abs}, representing {share_of_change:pct} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "direction",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=South].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment:label} region {direction} by {delta:money_abs}, representing {share_of_change:pct} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "direction",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=East].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment:label} region {direction} by {delta:money_abs}, representing {share_of_change:pct} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "direction",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=West].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue through the {segment:label} channel {direction} by {delta:money_abs}, representing {share_of_change:pct} of the total change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "direction",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "errors": [
+       "headline: placeholders ['delta_direction'] must match slot names ['delta_direction', 'delta_pct', 'month', 'comparison_period']",
+       "headline: stray brace; placeholders look like {name}",
+       "headline: delta cannot be shown as label",
+       "claim 1: placeholders ['delta_direction'] must match slot names ['delta_direction', 'unexpected', 'month']",
+       "claim 1: stray brace; placeholders look like {name}",
+       "claim 1: unexpected cannot be shown as label",
+       "claim 2: placeholders ['delta_direction'] must match slot names ['segment', 'delta_direction', 'delta', 'share_of_change']",
+       "claim 2: stray brace; placeholders look like {name}",
+       "claim 2: delta cannot be shown as label",
+       "claim 3: placeholders ['delta_direction'] must match slot names ['segment', 'delta_direction', 'delta', 'share_of_change']",
+       "claim 3: stray brace; placeholders look like {name}",
+       "claim 3: delta cannot be shown as label",
+       "claim 4: placeholders ['delta_direction'] must match slot names ['segment', 'delta_direction', 'delta', 'share_of_change']",
+       "claim 4: stray brace; placeholders look like {name}",
+       "claim 4: delta cannot be shown as label",
+       "claim 5: placeholders ['delta_direction'] must match slot names ['segment', 'delta_direction', 'delta', 'share_of_change']",
+       "claim 5: stray brace; placeholders look like {name}",
+       "claim 5: delta cannot be shown as label",
+       "claim 6: placeholders ['delta_direction'] must match slot names ['segment', 'delta_direction', 'delta', 'share_of_change']",
+       "claim 6: stray brace; placeholders look like {name}",
+       "claim 6: delta cannot be shown as label"
+      ],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue {delta_direction} by {delta_pct:pct_abs} in {month:label} compared with {comparison_period:label}.",
+        "slots": [
+         {
+          "name": "delta_direction",
+          "ref": "ev_total.delta",
+          "fmt": "label"
+         },
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct_abs"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "comparison_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall revenue {delta_direction} by {unexpected:money_abs} in {month:label}.",
+         "slots": [
+          {
+           "name": "delta_direction",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "label"
+          },
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "month",
+           "ref": "ev_total.comparison_period",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment:label} region {delta_direction} by {delta:money_abs}, representing {share_of_change:pct}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta_direction",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=North].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment:label} region {delta_direction} by {delta:money_abs}, representing {share_of_change:pct}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta_direction",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=South].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment:label} region {delta_direction} by {delta:money_abs}, representing {share_of_change:pct}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta_direction",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=East].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment:label} region {delta_direction} by {delta:money_abs}, representing {share_of_change:pct}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta_direction",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=West].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue through the {segment:label} channel {delta_direction} by {delta:money_abs}, representing {share_of_change:pct}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta_direction",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_channel.rows[segment=web].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "scenario": "c",
+    "seed": 23,
+    "status": "completed",
+    "attempts": [
+     {
+      "errors": [],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue rose by {delta_pct} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "Overall, revenue rose by {delta} between {baseline_period} and {comparison_period}.",
+         "slots": [
+          {
+           "name": "delta",
+           "ref": "ev_total.delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "baseline_period",
+           "ref": "ev_total.baseline_period",
+           "fmt": "label"
+          },
+          {
+           "name": "comparison_period",
+           "ref": "ev_total.comparison_period",
+           "fmt": "label"
+          }
+         ]
+        },
+        {
+         "template": "The {segment} region saw a rise in revenue of {delta}, contributing {share_of_change} to the overall change.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "share_of_change",
+           "ref": "ev_dec_region.rows[segment=North].share_of_change",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {drop}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "drop",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The {segment} channel saw a rise in revenue of {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Movements in revenue across regions largely offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     }
+    ],
+    "repaired": false,
+    "rendered": [
+     "Revenue rose by 1.2% in October 2025 compared with September 2025.",
+     "Overall, revenue rose by $15,932 between September 2025 and October 2025.",
+     "The North region saw a rise in revenue of $14,588, contributing 91.6% to the overall change.",
+     "Revenue in the East region fell by $11,285.",
+     "The web channel saw a rise in revenue of $7,215.",
+     "Movements in revenue across regions largely offset each other."
+    ],
+    "covers_planted": null
+   },
+   {
+    "scenario": "c",
+    "seed": 24,
+    "status": "completed",
+    "attempts": [
+     {
+      "errors": [],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue rose by {delta} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta",
+          "ref": "ev_total.delta",
+          "fmt": "money"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The overall change in revenue was {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region rose by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {drop}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "drop",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region rose by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {drop}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "drop",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The {segment} channel saw revenue rise by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_channel.rows[segment=web].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_channel.rows[segment=web].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ],
+    "repaired": false,
+    "rendered": [
+     "Revenue rose by $8,442 in October 2025 compared with September 2025.",
+     "The overall change in revenue was $7,598 (0.6%).",
+     "Revenue in the North region rose by $10,010.",
+     "Revenue in the South region fell by $7,792.",
+     "Revenue in the East region rose by $12,232.",
+     "Revenue in the West region fell by $6,008.",
+     "The web channel saw revenue rise by $6,757."
+    ],
+    "covers_planted": null
+   },
+   {
+    "scenario": "c",
+    "seed": 25,
+    "status": "completed",
+    "attempts": [
+     {
+      "errors": [],
+      "driver_claims": 0,
+      "digits": false,
+      "output": {
+       "headline": {
+        "template": "Revenue rose by {delta_pct} in {month} compared with {baseline_period}.",
+        "slots": [
+         {
+          "name": "delta_pct",
+          "ref": "ev_total.delta_pct",
+          "fmt": "pct"
+         },
+         {
+          "name": "month",
+          "ref": "ev_total.comparison_period",
+          "fmt": "label"
+         },
+         {
+          "name": "baseline_period",
+          "ref": "ev_total.baseline_period",
+          "fmt": "label"
+         }
+        ]
+       },
+       "claims": [
+        {
+         "template": "The overall change in revenue was {unexpected} ({unexpected_pct}).",
+         "slots": [
+          {
+           "name": "unexpected",
+           "ref": "ev_base_total.unexpected",
+           "fmt": "money_abs"
+          },
+          {
+           "name": "unexpected_pct",
+           "ref": "ev_base_total.unexpected_pct",
+           "fmt": "pct_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region rose by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=North].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=North].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region rose by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=South].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=South].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region fell by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=East].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=East].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "Revenue in the {segment} region rose by {delta}.",
+         "slots": [
+          {
+           "name": "segment",
+           "ref": "ev_dec_region.rows[segment=West].segment",
+           "fmt": "label"
+          },
+          {
+           "name": "delta",
+           "ref": "ev_dec_region.rows[segment=West].delta",
+           "fmt": "money_abs"
+          }
+         ]
+        },
+        {
+         "template": "The movements in revenue across regions offset each other.",
+         "slots": []
+        }
+       ]
+      }
+     }
+    ],
+    "repaired": false,
+    "rendered": [
+     "Revenue rose by 1.7% in October 2025 compared with September 2025.",
+     "The overall change in revenue was $16,015 (1.6%).",
+     "Revenue in the North region rose by $10,511.",
+     "Revenue in the South region rose by $7,049.",
+     "Revenue in the East region fell by $5,869.",
+     "Revenue in the West region rose by $6,103.",
+     "The movements in revenue across regions offset each other."
+    ],
+    "covers_planted": null
+   }
+  ]
+ },
+ "summary": {
+  "criteria": {
+   "1_resolve": false,
+   "2_schema": false,
+   "3_latency": false,
+   "4_s6": false
+  },
+  "pass": false,
+  "projected_llm_s": {
+   "p50_s": 368.9,
+   "p90_s": 550.7
+  }
+ },
+ "guided": {
+  "passed": 20,
+  "n": 20,
+  "reports": [
+   {
+    "scenario": "a",
+    "seed": 0,
+    "errors": [],
+    "rendered": [
+     "revenue fell by $110,283 (8.4%) from the baseline month.",
+     "North came in 25.7% below the level its own history predicted, beyond normal variation.",
+     "The largest regional contribution came from North, at 96.3% of the change."
+    ]
+   },
+   {
+    "scenario": "a",
+    "seed": 1,
+    "errors": [],
+    "rendered": [
+     "revenue fell by $61,417 (7.0%) from the baseline month.",
+     "South came in 26.8% below the level its own history predicted, beyond normal variation.",
+     "The largest regional contribution came from South, at 101.0% of the change."
+    ]
+   },
+   {
+    "scenario": "a",
+    "seed": 2,
+    "errors": [],
+    "rendered": [
+     "revenue fell by $110,197 (8.0%) from the baseline month.",
+     "East came in 27.9% below the level its own history predicted, beyond normal variation.",
+     "The largest regional contribution came from East, at 91.5% of the change."
+    ]
+   },
+   {
+    "scenario": "a",
+    "seed": 3,
+    "errors": [],
+    "rendered": [
+     "revenue fell by $45,560 (4.8%) from the baseline month.",
+     "West came in 23.3% below the level its own history predicted, beyond normal variation.",
+     "The largest regional contribution came from West, at 101.5% of the change."
+    ]
+   },
+   {
+    "scenario": "a",
+    "seed": 4,
+    "errors": [],
+    "rendered": [
+     "revenue fell by $61,838 (6.6%) from the baseline month.",
+     "North came in 18.3% below the level its own history predicted, beyond normal variation.",
+     "The largest regional contribution came from North, at 87.9% of the change."
+    ]
+   },
+   {
+    "scenario": "a",
+    "seed": 5,
+    "errors": [],
+    "rendered": [
+     "revenue fell by $67,335 (5.7%) from the baseline month.",
+     "South came in 25.6% below the level its own history predicted, beyond normal variation.",
+     "The largest regional contribution came from South, at 117.2% of the change."
+    ]
+   },
+   {
+    "scenario": "a",
+    "seed": 6,
+    "errors": [],
+    "rendered": [
+     "revenue fell by $97,255 (7.6%) from the baseline month.",
+     "East came in 26.5% below the level its own history predicted, beyond normal variation.",
+     "The largest regional contribution came from East, at 91.4% of the change."
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 10,
+    "errors": [],
+    "rendered": [
+     "aov fell by $0.42 (0.6%) from the baseline month.",
+     "East came in 5.7% above the level its own history predicted, beyond normal variation.",
+     "West came in 5.7% below the level its own history predicted, beyond normal variation."
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 11,
+    "errors": [],
+    "rendered": [
+     "aov fell by $0.43 (0.6%) from the baseline month.",
+     "North came in 5.6% below the level its own history predicted, beyond normal variation.",
+     "West came in 4.9% above the level its own history predicted, beyond normal variation."
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 12,
+    "errors": [],
+    "rendered": [
+     "aov rose by $0.72 (1.0%) from the baseline month.",
+     "North came in 4.9% above the level its own history predicted, beyond normal variation.",
+     "South came in 3.8% below the level its own history predicted, beyond normal variation."
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 13,
+    "errors": [],
+    "rendered": [
+     "aov rose by $0.33 (0.5%) from the baseline month.",
+     "South came in 5.2% above the level its own history predicted, beyond normal variation.",
+     "East came in 3.9% below the level its own history predicted, beyond normal variation."
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 14,
+    "errors": [],
+    "rendered": [
+     "aov rose by $0.68 (0.9%) from the baseline month.",
+     "East came in 4.0% above the level its own history predicted, beyond normal variation.",
+     "West came in 4.0% below the level its own history predicted, beyond normal variation."
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 15,
+    "errors": [],
+    "rendered": [
+     "aov rose by $0.14 (0.3%) from the baseline month.",
+     "North came in 6.5% below the level its own history predicted, beyond normal variation.",
+     "West came in 4.6% above the level its own history predicted, beyond normal variation."
+    ]
+   },
+   {
+    "scenario": "b",
+    "seed": 16,
+    "errors": [],
+    "rendered": [
+     "aov fell by $0.64 (0.9%) from the baseline month.",
+     "North came in 4.7% above the level its own history predicted, beyond normal variation.",
+     "South came in 4.7% below the level its own history predicted, beyond normal variation."
+    ]
+   },
+   {
+    "scenario": "c",
+    "seed": 20,
+    "errors": [],
+    "rendered": [
+     "revenue rose by $18,874 (1.4%) from the baseline month.",
+     "No region or channel moved beyond its normal range of variation.",
+     "The largest regional contribution came from East, at 57.6% of the change."
+    ]
+   },
+   {
+    "scenario": "c",
+    "seed": 21,
+    "errors": [],
+    "rendered": [
+     "revenue rose by $2,061 (0.2%) from the baseline month.",
+     "No region or channel moved beyond its normal range of variation.",
+     "Regional movements largely offset each other, so no single region accounts for a meaningful share of the change."
+    ]
+   },
+   {
+    "scenario": "c",
+    "seed": 22,
+    "errors": [],
+    "rendered": [
+     "revenue fell by $18,201 (1.3%) from the baseline month.",
+     "No region or channel moved beyond its normal range of variation.",
+     "The largest regional contribution came from East, at -75.3% of the change."
+    ]
+   },
+   {
+    "scenario": "c",
+    "seed": 23,
+    "errors": [],
+    "rendered": [
+     "revenue rose by $15,932 (1.2%) from the baseline month.",
+     "No region or channel moved beyond its normal range of variation.",
+     "The largest regional contribution came from North, at 91.6% of the change."
+    ]
+   },
+   {
+    "scenario": "c",
+    "seed": 24,
+    "errors": [],
+    "rendered": [
+     "revenue rose by $8,442 (0.7%) from the baseline month.",
+     "No region or channel moved beyond its normal range of variation.",
+     "Regional movements largely offset each other, so no single region accounts for a meaningful share of the change."
+    ]
+   },
+   {
+    "scenario": "c",
+    "seed": 25,
+    "errors": [],
+    "rendered": [
+     "revenue rose by $17,794 (1.7%) from the baseline month.",
+     "No region or channel moved beyond its normal range of variation.",
+     "The largest regional contribution came from North, at 59.1% of the change."
+    ]
+   }
+  ]
+ },
+ "elapsed_min": 110.2
+}
